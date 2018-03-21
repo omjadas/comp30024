@@ -7,7 +7,9 @@ class Board:
         pass
 
     def readBoard(self):
-        pass
+        for _ in range(8):
+            self.layout.append(list(input()))
+        return None
 
     def makeMove(self):
         pass
