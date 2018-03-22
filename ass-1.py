@@ -7,6 +7,7 @@ class Board:
         pass
 
     def readBoard(self):
+        """Read the board layout from input"""
         for _ in range(8):
             self.layout.append(list(input()))
         return None
