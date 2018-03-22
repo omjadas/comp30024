@@ -6,13 +6,13 @@ class Board:
     def __init__(self):
         pass
 
-    def readBoard(self):
+    def read_board(self):
         """Read the board layout from input"""
         for _ in range(8):
             self.layout.append(list(input()))
         return None
 
-    def makeMove(self):
+    def make_move(self):
         pass
 
 
