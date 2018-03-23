@@ -7,15 +7,15 @@ class Game:
         pass
 
     def read_board(self):
-    """Read the board layout from input"""
-    for _ in range(8):
-        self.layout.append(list(input()))
-    return None
+        """Read the board layout from input"""
+        for _ in range(8):
+            self.layout.append(list(input()))
+        return None
 
     def make_move(self):
         pass
     
-    def count_moves():
+    def count_moves(self):
         pass
 
     def massacre(self):
@@ -33,7 +33,6 @@ class Board:
 
     def __init__(self, layout):
         self.layout = layout
-        return none
 
     def make_move(self):
         pass
@@ -52,8 +51,11 @@ class Node:
     """
     """
 
+    def __init__(self, board):
+        self.board = board
 
-game = new Game()
+
+game = Game()
 game.read_board()
 if (input() == "Moves"):
     game.moves()
