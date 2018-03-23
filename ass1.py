@@ -1,13 +1,14 @@
 class Game:
     """
     """
-    layout = []
 
     def __init__(self):
+        self.player1 = Player()
         pass
 
     def read_board(self):
         """Read the board layout from input"""
+        self.layout = []
         for _ in range(8):
             self.layout.append(list(input()))
         return None
@@ -28,7 +29,6 @@ class Game:
 class Board:
     """
     """
-    layout = []
 
     def __init__(self, layout):
         self.layout = layout
@@ -40,9 +40,9 @@ class Board:
 class Player:
     """
     """
-    pieces = []
 
     def __init__(self):
+        self.pieces = []
         pass
 
 
