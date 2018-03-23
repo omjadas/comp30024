@@ -3,8 +3,9 @@ class Game:
     """
 
     def __init__(self):
-        self.player1 = Player()
-        pass
+        self.read_board()
+        self.white = Player(self.layout, "O")
+        self.black = Player(self.layout, "@")
 
     def read_board(self):
         """Read the board layout from input"""
@@ -41,9 +42,13 @@ class Player:
     """
     """
 
-    def __init__(self):
+    def __init__(self, layout, player):
         self.pieces = []
-        pass
+        for i in range(len(layout)):
+            for j in range(len(i)):
+                if j == player:
+                    self.pieces.append((i,j))
+
 
 
 class Node:
