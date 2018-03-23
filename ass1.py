@@ -23,9 +23,6 @@ class Game:
     def massacre(self):
         pass
 
-    def moves(self):
-        pass
-
 
 class Board:
     """
@@ -47,8 +44,7 @@ class Player:
         for i in range(len(layout)):
             for j in range(len(i)):
                 if j == player:
-                    self.pieces.append((i,j))
-
+                    self.pieces.append([i, j])
 
 
 class Node:
@@ -64,6 +60,6 @@ class Node:
 game = Game()
 game.read_board()
 if (input() == "Moves"):
-    game.moves()
+    game.count_moves()
 else:
     game.massacre()
