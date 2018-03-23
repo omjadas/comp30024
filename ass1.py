@@ -14,7 +14,7 @@ class Game:
 
     def make_move(self):
         pass
-    
+
     def count_moves(self):
         pass
 
@@ -23,7 +23,6 @@ class Game:
 
     def moves(self):
         pass
-
 
 
 class Board:
@@ -51,8 +50,10 @@ class Node:
     """
     """
 
-    def __init__(self, board):
+    def __init__(self, board, parent):
         self.board = board
+        self.children = []
+        self.parent = parent
 
 
 game = Game()
