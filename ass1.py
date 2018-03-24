@@ -17,7 +17,7 @@ class Game:
     def make_move(self):
         pass
 
-    def count_moves(self):
+    def moves(self):
         print(self.white_player.count_moves(self.layout))
         print(self.black_player.count_moves(self.layout))
         return None
@@ -83,6 +83,6 @@ class Node:
 
 game = Game()
 if (input() == "Moves"):
-    game.count_moves()
+    game.moves()
 else:
     game.massacre()
