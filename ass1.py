@@ -18,44 +18,8 @@ class Game:
         pass
 
     def count_moves(self):
-        white_moves = 0
-        black_moves = 0
-        for i in self.white_player.pieces:
-            if i[0] > 0 and self.layout[i[0] - 1][i[1]] == "-":
-                white_moves += 1
-            if i[1] > 0 and self.layout[i[0]][i[1] - 1] == "-":
-                white_moves += 1
-            if i[0] < 7 and self.layout[i[0] + 1][i[1]] == "-":
-                white_moves += 1
-            if i[1] < 7 and self.layout[i[0]][i[1] + 1] == "-":
-                white_moves += 1
-            if i[0] > 1 and self.layout[i[0] - 1][i[1]] in ["O","@"] and self.layout[i[0] - 2][i[1]] == "-":
-                white_moves += 1
-            if i[1] > 1 and self.layout[i[0]][i[1] - 1] in ["O","@"] and self.layout[i[0]][i[1] - 2] == "-":
-                white_moves += 1
-            if i[0] < 6 and self.layout[i[0] + 1][i[1]] in ["O","@"] and self.layout[i[0] + 2][i[1]] == "-":
-                white_moves += 1
-            if i[1] < 6 and self.layout[i[0]][i[1] + 1] in ["O","@"] and self.layout[i[0]][i[1] + 2] == "-":
-                white_moves += 1
-        for i in self.black_player.pieces:
-            if i[0] > 0 and self.layout[i[0] - 1][i[1]] == "-":
-                black_moves += 1
-            if i[1] > 0 and self.layout[i[0]][i[1] - 1] == "-":
-                black_moves += 1
-            if i[0] < 7 and self.layout[i[0] + 1][i[1]] == "-":
-                black_moves += 1
-            if i[1] < 7 and self.layout[i[0]][i[1] + 1] == "-":
-                black_moves += 1
-            if i[0] > 1 and self.layout[i[0] - 1][i[1]] in ["O","@"] and self.layout[i[0] - 2][i[1]] == "-":
-                black_moves += 1
-            if i[1] > 1 and self.layout[i[0]][i[1] - 1] in ["O","@"] and self.layout[i[0]][i[1] - 2] == "-":
-                black_moves += 1
-            if i[0] < 6 and self.layout[i[0] + 1][i[1]] in ["O","@"] and self.layout[i[0] + 2][i[1]] == "-":
-                black_moves += 1
-            if i[1] < 6 and self.layout[i[0]][i[1] + 1] in ["O","@"] and self.layout[i[0]][i[1] + 2] == "-":
-                black_moves += 1
-        print(white_moves)
-        print(black_moves)
+        print(self.white_player.count_moves(self.layout))
+        print(self.black_player.count_moves(self.layout))
         return None
 
     def massacre(self):
@@ -71,6 +35,7 @@ class Board:
 
     def make_move(self):
         pass
+        
 
 
 class Player:
@@ -83,6 +48,27 @@ class Player:
             for j in range(len(layout[i])):
                 if layout[i][j] == player:
                     self.pieces.append([i, j])
+    
+    def count_moves(self, layout):
+        moves = 0
+        for i in self.pieces:
+            if i[0] > 0 and layout[i[0] - 1][i[1]] == "-":
+                moves += 1
+            if i[1] > 0 and layout[i[0]][i[1] - 1] == "-":
+                moves += 1
+            if i[0] < 7 and layout[i[0] + 1][i[1]] == "-":
+                moves += 1
+            if i[1] < 7 and layout[i[0]][i[1] + 1] == "-":
+                moves += 1
+            if i[0] > 1 and layout[i[0] - 1][i[1]] in ["O","@"] and layout[i[0] - 2][i[1]] == "-":
+                moves += 1
+            if i[1] > 1 and layout[i[0]][i[1] - 1] in ["O","@"] and layout[i[0]][i[1] - 2] == "-":
+                moves += 1
+            if i[0] < 6 and layout[i[0] + 1][i[1]] in ["O","@"] and layout[i[0] + 2][i[1]] == "-":
+                moves += 1
+            if i[1] < 6 and layout[i[0]][i[1] + 1] in ["O","@"] and layout[i[0]][i[1] + 2] == "-":
+                moves += 1
+        return moves
 
 
 class Node:
