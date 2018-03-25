@@ -1,3 +1,9 @@
+FREE_TILE = 0
+CORNER_TILE = 1
+OUT_TILE = 2
+MOVES_TILL_SHRINK = 128
+BORDER_TILE = 7
+
 class Game:
     """
     """
@@ -27,14 +33,34 @@ class Game:
 
 
 class Board:
+    
+
     """
     """
+    num_moves = 0
 
     def __init__(self, layout):
         self.layout = layout
 
     def make_move(self):
         pass
+
+    def type_of_square(self, row, column):
+        times_shrunk = self.num_moves/MOVES_TILL_SHRINK
+
+        if row > 7-times_shrunk or row < 0+times_shrunk or column > 7-times_shrunk or column < 0+times_shrunk:
+            return OUT_TILE
+
+        if (row == 0 + times_shrunk or row == 7 - times_shrunk) and (column == 0 + times_shrunk or column == 7 - times_shrunk):
+            return CORNER_TILE
+
+        if self.layout[row][column] in ["O","@"]:
+            return self.layout[row][column]
+        
+        if self.layout[row][column] == "-":
+            return FREE_TILE
+
+
 
 
 
