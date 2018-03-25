@@ -80,22 +80,24 @@ class Player:
     def count_moves(self, board):
         moves = 0
         for i in self.pieces:
-            if i[0] > 0 and board.layout[i[0] - 1][i[1]] == "-":
+            if board.type_of_square(i[0]+1,i[1]) == FREE_TILE:
+                moves += 1            
+            if board.type_of_square(i[0]-1,i[1]) == FREE_TILE:
                 moves += 1
-            if i[1] > 0 and board.layout[i[0]][i[1] - 1] == "-":
+            if board.type_of_square(i[0],i[1]+1) == FREE_TILE:
                 moves += 1
-            if i[0] < 7 and board.layout[i[0] + 1][i[1]] == "-":
+            if board.type_of_square(i[0],i[1]-1) == FREE_TILE:
                 moves += 1
-            if i[1] < 7 and board.layout[i[0]][i[1] + 1] == "-":
+            if board.type_of_square(i[0]+1,i[1]) in ["O","@"] and board.type_of_square(i[0]+2,i[1]) == FREE_TILE:
+                moves += 1            
+            if board.type_of_square(i[0]-1,i[1]) in ["O","@"] and board.type_of_square(i[0]-2,i[1]) == FREE_TILE:
                 moves += 1
-            if i[0] > 1 and board.layout[i[0] - 1][i[1]] in ["O","@"] and board.layout[i[0] - 2][i[1]] == "-":
+            if board.type_of_square(i[0],i[1]+1) in ["O","@"] and board.type_of_square(i[0],i[1]+2) == FREE_TILE:
                 moves += 1
-            if i[1] > 1 and board.layout[i[0]][i[1] - 1] in ["O","@"] and board.layout[i[0]][i[1] - 2] == "-":
+            if board.type_of_square(i[0],i[1]-1) in ["O","@"] and board.type_of_square(i[0],i[1]-2) == FREE_TILE:
                 moves += 1
-            if i[0] < 6 and board.layout[i[0] + 1][i[1]] in ["O","@"] and board.layout[i[0] + 2][i[1]] == "-":
-                moves += 1
-            if i[1] < 6 and board.layout[i[0]][i[1] + 1] in ["O","@"] and board.layout[i[0]][i[1] + 2] == "-":
-                moves += 1
+
+        
         return moves
 
 
