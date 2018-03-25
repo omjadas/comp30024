@@ -35,7 +35,7 @@ class Board:
 
     def make_move(self):
         pass
-        
+
 
 
 class Player:
@@ -48,7 +48,7 @@ class Player:
             for j in range(len(layout[i])):
                 if layout[i][j] == player:
                     self.pieces.append([i, j])
-    
+
     def count_moves(self, layout):
         moves = 0
         for i in self.pieces:
