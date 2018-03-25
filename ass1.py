@@ -10,22 +10,24 @@ class Game:
 
     def __init__(self):
         self.read_board()
-        self.white_player = Player(self.layout, "O")
-        self.black_player = Player(self.layout, "@")
+        self.white_player = Player(self.board.layout, "O")
+        self.black_player = Player(self.board.layout, "@")
 
     def read_board(self):
         """Read the board layout from input"""
-        self.layout = []
+        layout = []
         for _ in range(8):
-            self.layout.append(list(input()))
+            layout.append(list(input()))
+
+        self.board = Board(layout)
         return None
 
     def make_move(self):
         pass
 
     def moves(self):
-        print(self.white_player.count_moves(self.layout))
-        print(self.black_player.count_moves(self.layout))
+        print(self.white_player.count_moves(self.board))
+        print(self.black_player.count_moves(self.board))
         return None
 
     def massacre(self):
@@ -75,24 +77,24 @@ class Player:
                 if layout[i][j] == player:
                     self.pieces.append([i, j])
 
-    def count_moves(self, layout):
+    def count_moves(self, board):
         moves = 0
         for i in self.pieces:
-            if i[0] > 0 and layout[i[0] - 1][i[1]] == "-":
+            if i[0] > 0 and board.layout[i[0] - 1][i[1]] == "-":
                 moves += 1
-            if i[1] > 0 and layout[i[0]][i[1] - 1] == "-":
+            if i[1] > 0 and board.layout[i[0]][i[1] - 1] == "-":
                 moves += 1
-            if i[0] < 7 and layout[i[0] + 1][i[1]] == "-":
+            if i[0] < 7 and board.layout[i[0] + 1][i[1]] == "-":
                 moves += 1
-            if i[1] < 7 and layout[i[0]][i[1] + 1] == "-":
+            if i[1] < 7 and board.layout[i[0]][i[1] + 1] == "-":
                 moves += 1
-            if i[0] > 1 and layout[i[0] - 1][i[1]] in ["O","@"] and layout[i[0] - 2][i[1]] == "-":
+            if i[0] > 1 and board.layout[i[0] - 1][i[1]] in ["O","@"] and board.layout[i[0] - 2][i[1]] == "-":
                 moves += 1
-            if i[1] > 1 and layout[i[0]][i[1] - 1] in ["O","@"] and layout[i[0]][i[1] - 2] == "-":
+            if i[1] > 1 and board.layout[i[0]][i[1] - 1] in ["O","@"] and board.layout[i[0]][i[1] - 2] == "-":
                 moves += 1
-            if i[0] < 6 and layout[i[0] + 1][i[1]] in ["O","@"] and layout[i[0] + 2][i[1]] == "-":
+            if i[0] < 6 and board.layout[i[0] + 1][i[1]] in ["O","@"] and board.layout[i[0] + 2][i[1]] == "-":
                 moves += 1
-            if i[1] < 6 and layout[i[0]][i[1] + 1] in ["O","@"] and layout[i[0]][i[1] + 2] == "-":
+            if i[1] < 6 and board.layout[i[0]][i[1] + 1] in ["O","@"] and board.layout[i[0]][i[1] + 2] == "-":
                 moves += 1
         return moves
 
