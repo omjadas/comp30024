@@ -42,7 +42,7 @@ class Board:
         self.black_player = Player(self.layout, BLACK)
         self.num_moves = 0
 
-    def make_move2(self, move, player):
+    def make_move(self, move, player):
         self.layout[move[0][0]][move[0][1]] = "-"
         if player == WHITE:
             self.white_player.make_move(move)
@@ -83,31 +83,6 @@ class Board:
                                                                 self.type_of_square(row, col - 1) == enemy))):
             return True
         return False
-
-    def make_move(self, o_row, o_column, n_row, n_column, players):
-        player_moved = players[0] if self.layout[o_row][o_column] == WHITE else players[1]
-
-        player_moved.pieces[player_moved.pieces.index([o_row, o_column])] = [
-            n_row, n_column]
-
-        self.layout[n_row][n_column] = self.layout[o_row][o_column]
-        self.layout[o_row][o_column] = "-"
-
-        for i, player in enumerate(players):
-            enemy = [BLACK, WHITE]
-            for piece in player.pieces:
-                if ((self.type_of_square(piece[0] + 1, piece[1]) == CORNER_TILE or
-                     self.type_of_square(piece[0] + 1, piece[1]) == enemy[i]) and
-                    (self.type_of_square(piece[0] - 1, piece[1]) == CORNER_TILE or
-                     self.type_of_square(piece[0] - 1, piece[1]) == enemy[i])):
-                    self.kill(piece, player)
-
-                if ((self.type_of_square(piece[0], piece[1] + 1) == CORNER_TILE or
-                     self.type_of_square(piece[0], piece[1] + 1) == enemy[i]) and
-                    (self.type_of_square(piece[0], piece[1] - 1) == CORNER_TILE or
-                     self.type_of_square(piece[0], piece[1] - 1) == enemy[i])):
-                    self.kill(piece, player)
-        return None
 
     def kill(self, piece, player):
         if player == WHITE:
