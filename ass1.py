@@ -38,6 +38,7 @@ class Game:
         return None
 
     def massacre(self):
+        Player.minimax(self.board.layout, self.board.white_player, self.board.black_player)
         pass
 
 
@@ -124,7 +125,7 @@ class Board:
         new_player1 = copy.deepcopy(player1)
         new_player2 = copy.deepcopy(player2)
         Board.make_move(move, layout, new_player1, new_player2)
-        return (new_layout, new_player1.pieces)
+        return (new_layout, new_player1, new_player2)
 
     @staticmethod
     def game_finished(layout):
@@ -180,18 +181,23 @@ class Player:
         pieces.add(move[1])
         return pieces
 
-    def minimax(self, layout, player2, depth=MAX_DEPTH, visited=[]):
-        moves = Player.generate_moves(layout, self.pieces)
+    @staticmethod
+    def minimax(layout, player1, player2, depth=MAX_DEPTH, visited=[]):
+        if depth == 0 or Board.game_finished(layout):
+            return layout
+        visited.append(layout)
+        moves = Player.generate_moves(layout, player1.pieces)
         children = []
         for move in moves:
             children.append(
-                Board.generatate_board(
-                    layout, move, self, player2))
-        if depth == 0 or Board.game_finished(layout):
-            return layout
-        for child in children:
+                *Board.generatate_board(
+                    layout, move, player1, player2), float('-inf'))
 
-        return None
+        best_value = ('-inf')
+        for child in children:
+            v = Player.minimax(child[0][0], child[0][1], child[0][2], depth - 1, visited)
+            best_value = sorted((best_value, v), key=lambda x: x[-1])[-1]
+        return best_value
 
 
 class Node:
