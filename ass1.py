@@ -1,3 +1,5 @@
+import copy
+
 FREE_TILE = 0
 CORNER_TILE = 1
 OUT_TILE = 2
@@ -108,6 +110,13 @@ class Board:
         if self.layout[row][col] == "-":
             return FREE_TILE
 
+    @staticmethod
+    def generatate_board(board, move):
+        new_board = copy.deepcopy(board)
+        new_board[move[0][0]][move[0][1]], new_board[move[1][0]][move[1][1]
+                                                                 ] = new_board[move[1][0]][move[1][1]], new_board[move[0][0]][move[0][1]]
+        return new_board
+
 
 class Player:
     """
@@ -121,11 +130,12 @@ class Player:
                     self.pieces.add((i, j))
 
     def count_moves(self, board):
-        return len(self.generate_moves(board))
+        return len(Player.generate_moves(board, self.pieces))
 
-    def generate_moves(self, board):
+    @staticmethod
+    def generate_moves(board, pieces):
         moves = []
-        for i in self.pieces:
+        for i in pieces:
             if board.type_of_square(i[0] + 1, i[1]) == FREE_TILE:
                 moves.append((i, (i[0] + 1, i[1])))
             if board.type_of_square(i[0] - 1, i[1]) == FREE_TILE:
@@ -146,13 +156,22 @@ class Player:
             if board.type_of_square(
                     i[0], i[1] - 1) in [WHITE, BLACK] and board.type_of_square(i[0], i[1] - 2) == FREE_TILE:
                 moves.append((i, (i[0], i[1] - 2)))
-
         return moves
 
     def make_move(self, move):
         self.pieces.discard(move[0])
         self.pieces.add(move[1])
         return None
+
+    def minimax(self, board, depth, visited=[]):
+        moves = Player.generate_moves(board, self.pieces)
+        children = []
+        for move in moves:
+            children.append(Board.generatate_board(board, move))
+        print(children)
+
+        # if dpeth == 0 or
+        pass
 
 
 class Node:
