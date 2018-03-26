@@ -38,7 +38,10 @@ class Game:
         return None
 
     def massacre(self):
-        Player.minimax(self.board.layout, self.board.white_player, self.board.black_player)
+        Player.minimax(
+            self.board.layout,
+            self.board.white_player,
+            self.board.black_player)
         pass
 
 
@@ -195,7 +198,12 @@ class Player:
 
         best_value = ('-inf')
         for child in children:
-            v = Player.minimax(child[0][0], child[0][1], child[0][2], depth - 1, visited)
+            v = Player.minimax(
+                child[0][0],
+                child[0][1],
+                child[0][2],
+                depth - 1,
+                visited)
             best_value = sorted((best_value, v), key=lambda x: x[-1])[-1]
         return best_value
 
