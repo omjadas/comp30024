@@ -44,8 +44,33 @@ class Board:
     def __init__(self, layout):
         self.layout = layout
 
-    def make_move(self):
-        pass
+    def make_move(self, o_row, o_column, n_row, n_column, players):
+        player_moved = players[0] if self.layout[o_row][o_column] == "O" else players[1]
+
+        player_moved.pieces[player_moved.pieces.index([o_row, o_column])] = [n_row, n_column]                
+
+        self.layout[n_row][n_column] = self.layout[o_row][o_column]
+        self.layout[o_row][o_column] = "-"
+
+        for i, player in enumerate(players):
+            enemy = ["@", "O"]
+            for piece in player.pieces:
+                if ((self.type_of_square(piece[0]+1, piece[1]) == CORNER_TILE or 
+                    self.type_of_square(piece[0]+1, piece[1]) == enemy[i]) and 
+                    (self.type_of_square(piece[0]-1, piece[1]) == CORNER_TILE or 
+                    self.type_of_square(piece[0]-1, piece[1]) == enemy[i])):
+                    self.kill(piece, players)
+
+                if ((self.type_of_square(piece[0], piece[1]+1) == CORNER_TILE or 
+                    self.type_of_square(piece[0], piece[1]+1) == enemy[i]) and 
+                    (self.type_of_square(piece[0], piece[1]-1) == CORNER_TILE or 
+                    self.type_of_square(piece[0], piece[1]-1) == enemy[i])):
+                    self.kill(piece, players)
+
+
+    def kill(self, piece, players):
+        pass       
+        
 
     def type_of_square(self, row, column):
         times_shrunk = self.num_moves/MOVES_TILL_SHRINK
