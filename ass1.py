@@ -11,8 +11,6 @@ class Game:
 
     def __init__(self):
         self.read_board()
-        self.white_player = Player(self.board.layout, "O")
-        self.black_player = Player(self.board.layout, "@")
 
     def read_board(self):
         """Read the board layout from input"""
@@ -27,8 +25,8 @@ class Game:
         pass
 
     def moves(self):
-        print(self.white_player.count_moves(self.board))
-        print(self.black_player.count_moves(self.board))
+        print(self.board.white_player.count_moves(self.board))
+        print(self.board.black_player.count_moves(self.board))
         return None
 
     def massacre(self):
@@ -43,6 +41,8 @@ class Board:
 
     def __init__(self, layout):
         self.layout = layout
+        self.white_player = Player(self.layout, "O")
+        self.black_player = Player(self.layout, "@")
 
     def make_move(self, o_row, o_column, n_row, n_column, players):
         player_moved = players[0] if self.layout[o_row][o_column] == "O" else players[1]
