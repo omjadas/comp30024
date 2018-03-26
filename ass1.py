@@ -59,17 +59,18 @@ class Board:
                     self.type_of_square(piece[0]+1, piece[1]) == enemy[i]) and 
                     (self.type_of_square(piece[0]-1, piece[1]) == CORNER_TILE or 
                     self.type_of_square(piece[0]-1, piece[1]) == enemy[i])):
-                    self.kill(piece, players)
+                    self.kill(piece, player)
 
                 if ((self.type_of_square(piece[0], piece[1]+1) == CORNER_TILE or 
                     self.type_of_square(piece[0], piece[1]+1) == enemy[i]) and 
                     (self.type_of_square(piece[0], piece[1]-1) == CORNER_TILE or 
                     self.type_of_square(piece[0], piece[1]-1) == enemy[i])):
-                    self.kill(piece, players)
+                    self.kill(piece, player)
 
 
-    def kill(self, piece, players):
-        pass       
+    def kill(self, piece, player):
+        self.layout[piece[0]][piece[1]] = "-"
+        player.pieces.remove(piece)       
         
 
     def type_of_square(self, row, column):
