@@ -4,6 +4,7 @@ OUT_TILE = 2
 MOVES_TILL_SHRINK = 128
 BORDER_TILE = 7
 
+
 class Game:
     """
     """
@@ -35,7 +36,6 @@ class Game:
 
 
 class Board:
-    
 
     """
     """
@@ -47,7 +47,8 @@ class Board:
     def make_move(self, o_row, o_column, n_row, n_column, players):
         player_moved = players[0] if self.layout[o_row][o_column] == "O" else players[1]
 
-        player_moved.pieces[player_moved.pieces.index([o_row, o_column])] = [n_row, n_column]                
+        player_moved.pieces[player_moved.pieces.index([o_row, o_column])] = [
+            n_row, n_column]
 
         self.layout[n_row][n_column] = self.layout[o_row][o_column]
         self.layout[o_row][o_column] = "-"
@@ -55,41 +56,38 @@ class Board:
         for i, player in enumerate(players):
             enemy = ["@", "O"]
             for piece in player.pieces:
-                if ((self.type_of_square(piece[0]+1, piece[1]) == CORNER_TILE or 
-                    self.type_of_square(piece[0]+1, piece[1]) == enemy[i]) and 
-                    (self.type_of_square(piece[0]-1, piece[1]) == CORNER_TILE or 
-                    self.type_of_square(piece[0]-1, piece[1]) == enemy[i])):
+                if ((self.type_of_square(piece[0] + 1, piece[1]) == CORNER_TILE or
+                     self.type_of_square(piece[0] + 1, piece[1]) == enemy[i]) and
+                    (self.type_of_square(piece[0] - 1, piece[1]) == CORNER_TILE or
+                     self.type_of_square(piece[0] - 1, piece[1]) == enemy[i])):
                     self.kill(piece, player)
 
-                if ((self.type_of_square(piece[0], piece[1]+1) == CORNER_TILE or 
-                    self.type_of_square(piece[0], piece[1]+1) == enemy[i]) and 
-                    (self.type_of_square(piece[0], piece[1]-1) == CORNER_TILE or 
-                    self.type_of_square(piece[0], piece[1]-1) == enemy[i])):
+                if ((self.type_of_square(piece[0], piece[1] + 1) == CORNER_TILE or
+                     self.type_of_square(piece[0], piece[1] + 1) == enemy[i]) and
+                    (self.type_of_square(piece[0], piece[1] - 1) == CORNER_TILE or
+                     self.type_of_square(piece[0], piece[1] - 1) == enemy[i])):
                     self.kill(piece, player)
-
 
     def kill(self, piece, player):
         self.layout[piece[0]][piece[1]] = "-"
-        player.pieces.remove(piece)       
-        
+        player.pieces.remove(piece)
 
     def type_of_square(self, row, column):
-        times_shrunk = self.num_moves/MOVES_TILL_SHRINK
+        times_shrunk = self.num_moves / MOVES_TILL_SHRINK
 
-        if row > 7-times_shrunk or row < 0+times_shrunk or column > 7-times_shrunk or column < 0+times_shrunk:
+        if row > 7 - times_shrunk or row < 0 + times_shrunk or column > 7 - \
+                times_shrunk or column < 0 + times_shrunk:
             return OUT_TILE
 
-        if (row == 0 + times_shrunk or row == 7 - times_shrunk) and (column == 0 + times_shrunk or column == 7 - times_shrunk):
+        if (row == 0 + times_shrunk or row == 7 - times_shrunk) and (column ==
+                                                                     0 + times_shrunk or column == 7 - times_shrunk):
             return CORNER_TILE
 
-        if self.layout[row][column] in ["O","@"]:
+        if self.layout[row][column] in ["O", "@"]:
             return self.layout[row][column]
-        
+
         if self.layout[row][column] == "-":
             return FREE_TILE
-
-
-
 
 
 class Player:
@@ -106,24 +104,27 @@ class Player:
     def count_moves(self, board):
         moves = 0
         for i in self.pieces:
-            if board.type_of_square(i[0]+1,i[1]) == FREE_TILE:
-                moves += 1            
-            if board.type_of_square(i[0]-1,i[1]) == FREE_TILE:
+            if board.type_of_square(i[0] + 1, i[1]) == FREE_TILE:
                 moves += 1
-            if board.type_of_square(i[0],i[1]+1) == FREE_TILE:
+            if board.type_of_square(i[0] - 1, i[1]) == FREE_TILE:
                 moves += 1
-            if board.type_of_square(i[0],i[1]-1) == FREE_TILE:
+            if board.type_of_square(i[0], i[1] + 1) == FREE_TILE:
                 moves += 1
-            if board.type_of_square(i[0]+1,i[1]) in ["O","@"] and board.type_of_square(i[0]+2,i[1]) == FREE_TILE:
-                moves += 1            
-            if board.type_of_square(i[0]-1,i[1]) in ["O","@"] and board.type_of_square(i[0]-2,i[1]) == FREE_TILE:
+            if board.type_of_square(i[0], i[1] - 1) == FREE_TILE:
                 moves += 1
-            if board.type_of_square(i[0],i[1]+1) in ["O","@"] and board.type_of_square(i[0],i[1]+2) == FREE_TILE:
+            if board.type_of_square(
+                    i[0] + 1, i[1]) in ["O", "@"] and board.type_of_square(i[0] + 2, i[1]) == FREE_TILE:
                 moves += 1
-            if board.type_of_square(i[0],i[1]-1) in ["O","@"] and board.type_of_square(i[0],i[1]-2) == FREE_TILE:
+            if board.type_of_square(
+                    i[0] - 1, i[1]) in ["O", "@"] and board.type_of_square(i[0] - 2, i[1]) == FREE_TILE:
+                moves += 1
+            if board.type_of_square(
+                    i[0], i[1] + 1) in ["O", "@"] and board.type_of_square(i[0], i[1] + 2) == FREE_TILE:
+                moves += 1
+            if board.type_of_square(
+                    i[0], i[1] - 1) in ["O", "@"] and board.type_of_square(i[0], i[1] - 2) == FREE_TILE:
                 moves += 1
 
-        
         return moves
 
 
