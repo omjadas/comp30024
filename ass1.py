@@ -102,29 +102,33 @@ class Player:
                     self.pieces.append([i, j])
 
     def count_moves(self, board):
-        moves = 0
+        return len(self.generate_moves(board))
+
+    def generate_moves(self, board):
+        moves = []
         for i in self.pieces:
+            i = tuple(i)
             if board.type_of_square(i[0] + 1, i[1]) == FREE_TILE:
-                moves += 1
+                moves.append((i,(i[0] + 1, i[1])))
             if board.type_of_square(i[0] - 1, i[1]) == FREE_TILE:
-                moves += 1
+                moves.append((i,(i[0] - 1, i[1])))
             if board.type_of_square(i[0], i[1] + 1) == FREE_TILE:
-                moves += 1
+                moves.append((i,(i[0], i[1] + 1)))
             if board.type_of_square(i[0], i[1] - 1) == FREE_TILE:
-                moves += 1
+                moves.append((i,(i[0], i[1] - 1)))
             if board.type_of_square(
                     i[0] + 1, i[1]) in ["O", "@"] and board.type_of_square(i[0] + 2, i[1]) == FREE_TILE:
-                moves += 1
+                moves.append((i,(i[0] + 2, i[1])))
             if board.type_of_square(
                     i[0] - 1, i[1]) in ["O", "@"] and board.type_of_square(i[0] - 2, i[1]) == FREE_TILE:
-                moves += 1
+                moves.append((i,(i[0] - 2, i[1])))
             if board.type_of_square(
                     i[0], i[1] + 1) in ["O", "@"] and board.type_of_square(i[0], i[1] + 2) == FREE_TILE:
-                moves += 1
+                moves.append((i,(i[0], i[1] + 2)))
             if board.type_of_square(
                     i[0], i[1] - 1) in ["O", "@"] and board.type_of_square(i[0], i[1] - 2) == FREE_TILE:
-                moves += 1
-
+                moves.append((i,(i[0], i[1] - 2)))
+        
         return moves
 
 
