@@ -34,7 +34,6 @@ class Game:
 
 
 class Board:
-
     """
     """
     num_moves = 0
@@ -109,26 +108,26 @@ class Player:
         for i in self.pieces:
             i = tuple(i)
             if board.type_of_square(i[0] + 1, i[1]) == FREE_TILE:
-                moves.append((i,(i[0] + 1, i[1])))
+                moves.append((i, (i[0] + 1, i[1])))
             if board.type_of_square(i[0] - 1, i[1]) == FREE_TILE:
-                moves.append((i,(i[0] - 1, i[1])))
+                moves.append((i, (i[0] - 1, i[1])))
             if board.type_of_square(i[0], i[1] + 1) == FREE_TILE:
-                moves.append((i,(i[0], i[1] + 1)))
+                moves.append((i, (i[0], i[1] + 1)))
             if board.type_of_square(i[0], i[1] - 1) == FREE_TILE:
-                moves.append((i,(i[0], i[1] - 1)))
+                moves.append((i, (i[0], i[1] - 1)))
             if board.type_of_square(
                     i[0] + 1, i[1]) in ["O", "@"] and board.type_of_square(i[0] + 2, i[1]) == FREE_TILE:
-                moves.append((i,(i[0] + 2, i[1])))
+                moves.append((i, (i[0] + 2, i[1])))
             if board.type_of_square(
                     i[0] - 1, i[1]) in ["O", "@"] and board.type_of_square(i[0] - 2, i[1]) == FREE_TILE:
-                moves.append((i,(i[0] - 2, i[1])))
+                moves.append((i, (i[0] - 2, i[1])))
             if board.type_of_square(
                     i[0], i[1] + 1) in ["O", "@"] and board.type_of_square(i[0], i[1] + 2) == FREE_TILE:
-                moves.append((i,(i[0], i[1] + 2)))
+                moves.append((i, (i[0], i[1] + 2)))
             if board.type_of_square(
                     i[0], i[1] - 1) in ["O", "@"] and board.type_of_square(i[0], i[1] - 2) == FREE_TILE:
-                moves.append((i,(i[0], i[1] - 2)))
-        
+                moves.append((i, (i[0], i[1] - 2)))
+
         return moves
 
 
