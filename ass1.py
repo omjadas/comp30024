@@ -7,6 +7,7 @@ MOVES_TILL_SHRINK = 128
 BORDER_TILE = 7
 WHITE = "O"
 BLACK = "@"
+MAX_DEPTH = 10
 
 
 class Game:
@@ -64,16 +65,16 @@ class Board:
         row = check_around[0]
         col = check_around[1]
         if (Board.type_of_square(row + 1, col, layout) ==
-                player2) and Board.surrounded(row + 1, col, player2, layout):
+                player2.symbol) and Board.surrounded(row + 1, col, player2.symbol, layout):
             Board.kill((row + 1, col), player2, layout)
         if (Board.type_of_square(row - 1, col, layout) ==
-                player2) and Board.surrounded(row - 1, col, player2, layout):
+                player2.symbol) and Board.surrounded(row - 1, col, player2.symbol, layout):
             Board.kill((row - 1, col), player2, layout)
         if (Board.type_of_square(row, col + 1, layout) ==
-                player2) and Board.surrounded(row, col + 1, player2, layout):
+                player2.symbol) and Board.surrounded(row, col + 1, player2.symbol, layout):
             Board.kill((row, col + 1), player2, layout)
         if (Board.type_of_square(row, col - 1, layout) ==
-                player2) and Board.surrounded(row, col - 1, player2, layout):
+                player2.symbol) and Board.surrounded(row, col - 1, player2.symbol, layout):
             Board.kill((row, col - 1), player2, layout)
         if (Board.surrounded(row, col, player1, layout)):
             Board.kill(check_around, player1, layout)
@@ -118,11 +119,17 @@ class Board:
             return FREE_TILE
 
     @staticmethod
-    def generatate_board(layout, move, pieces, player1, player2):
+    def generatate_board(layout, move, player1, player2):
         new_layout = copy.deepcopy(layout)
-        new_pieces = copy.deepcopy(pieces)
-        
-        return (new_layout, Player.make_move(new_pieces, move))
+        new_player1 = copy.deepcopy(player1)
+        new_player2 = copy.deepcopy(player2)
+        Board.make_move(move, layout, new_player1, new_player2)
+        return (new_layout, new_player1.pieces)
+
+    @staticmethod
+    def game_finished(layout):
+        flat_layout = list(sum(layout, ()))
+        return (WHITE not in flat_layout) or (BLACK not in flat_layout)
 
 
 class Player:
@@ -173,15 +180,18 @@ class Player:
         pieces.add(move[1])
         return pieces
 
-    def minimax(self, board, depth, player2, visited=[]):
-        moves = Player.generate_moves(board, self.pieces)
+    def minimax(self, layout, player2, depth=MAX_DEPTH, visited=[]):
+        moves = Player.generate_moves(layout, self.pieces)
         children = []
         for move in moves:
-            children.append(Board.generatate_board(board, move, self.pieces, self, player2))
-        print(children)
+            children.append(
+                Board.generatate_board(
+                    layout, move, self, player2))
+        if depth == 0 or Board.game_finished(layout):
+            return layout
+        for child in children:
 
-        # if dpeth == 0 or
-        pass
+        return None
 
 
 class Node:
