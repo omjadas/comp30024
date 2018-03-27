@@ -39,10 +39,11 @@ class Game:
 
     def massacre(self):
         moves = []
-        Player.minimax(
-            self.board.layout,
-            self.board.white_player,
-            self.board.black_player)
+        while not Board.game_finished(self.board.layout):
+            Player.minimax(
+                self.board.layout,
+                self.board.white_player,
+                self.board.black_player)
         return None
 
 
