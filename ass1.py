@@ -197,9 +197,7 @@ class Player:
 
     @staticmethod
     def minimax(layout, player1, player2, depth=MAX_DEPTH,
-                visited=None, pieces_taken=0, path=[]):
-        if visited == None:
-            visited = []
+                visited=[]], pieces_taken=0, path=[]):
         if depth == 0 or Board.game_finished(layout) or (layout in visited):
             return (layout, path, pieces_taken)
         visited.append(layout)
