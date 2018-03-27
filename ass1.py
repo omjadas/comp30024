@@ -40,10 +40,12 @@ class Game:
     def massacre(self):
         moves = []
         while not Board.game_finished(self.board.layout):
-            Player.minimax(
+            move = Player.minimax(
                 self.board.layout,
                 self.board.white_player,
                 self.board.black_player)
+            
+            Board.make_move(move[-2], self.board.layout,self.board.white_player, self.board.black_player)
         return None
 
 
@@ -88,7 +90,7 @@ class Board:
 
     @staticmethod
     def surrounded(row, col, player, layout):
-        enemy = BLACK if player.symbol == WHITE else WHITE
+        enemy = BLACK if player == WHITE else WHITE
         if (((Board.type_of_square(row + 1, col, layout) == CORNER_TILE or
               Board.type_of_square(row + 1, col, layout) == enemy) and
              (Board.type_of_square(row - 1, col, layout) == CORNER_TILE or
@@ -134,7 +136,8 @@ class Board:
 
     @staticmethod
     def game_finished(layout):
-        flat_layout = list(sum(layout, ()))
+        flat_layout = list(sum(list(layout), []))
+
         return (WHITE not in flat_layout) or (BLACK not in flat_layout)
 
 
@@ -188,22 +191,27 @@ class Player:
 
     @staticmethod
     def minimax(layout, player1, player2, depth=MAX_DEPTH,
-                visited=set(), pieces_taken=0):
+                visited=[], pieces_taken=0):
         if depth == 0 or Board.game_finished(layout):
             return (layout, pieces_taken)
-        visited.add(layout)
+        visited.append(layout)
         moves = Player.generate_moves(layout, player1.pieces)
         children = []
         for move in moves:
-            children.append(list(
-                Board.generatate_board(
-                    layout, move, player1, player2)))
+            children.append([
+                *Board.generatate_board(
+                    layout, move, player1, player2), move])
 
+        print(children)
         best_value = (float('-inf'),)
         for child in children:
+            print(child)
             child.append(pieces_taken +
-                         (list(sum(layout, ())).count(player2.symbol) -
-                          list(sum(move[0], ())).count(player2.symbol)))
+                         (list(sum(layout, [])).count(player2.symbol)) - 
+                          list(sum(child[0], [])).count(player2.symbol))
+
+            
+
             if child[0] not in visited:
                 v = Player.minimax(
                     child[0], child[1], child[2], depth - 1, visited, child[-1])
