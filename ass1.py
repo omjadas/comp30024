@@ -39,16 +39,17 @@ class Game:
 
     def massacre(self):
         while not Board.game_finished(self.board.layout):
-            print(self.board.layout)
+            # print(self.board.layout)
             move = Player.minimax(
                 self.board.layout,
                 self.board.white_player,
                 self.board.black_player)
 
-            print(move)
-            print(move[-2][0])
+            # print(move)
+            # print(move[-2][0])
 
             for m in move[-2]:
+                print("{} -> {}".format(m[0],m[1]))
                 Board.make_move(m, self.board.layout,
                                 self.board.white_player, self.board.black_player)
         return None
