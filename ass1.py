@@ -38,11 +38,12 @@ class Game:
         return None
 
     def massacre(self):
+        moves = []
         Player.minimax(
             self.board.layout,
             self.board.white_player,
             self.board.black_player)
-        pass
+        return None
 
 
 class Board:
