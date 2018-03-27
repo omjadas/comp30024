@@ -8,7 +8,7 @@ MOVES_TILL_SHRINK = 128
 BORDER_TILE = 7
 WHITE = "O"
 BLACK = "@"
-MAX_DEPTH = 5
+MAX_DEPTH = 4
 
 
 class Game:
@@ -203,7 +203,7 @@ class Player:
     def minimax(layout, player1, player2, depth=MAX_DEPTH,
                 visited=None, pieces_taken=0, path=[]):
         if visited == None:
-            visited = []
+            visited = []        
         if depth == 0 or Board.game_finished(layout) or (layout in visited):
             return (layout, path, pieces_taken)
         visited.append(layout)
