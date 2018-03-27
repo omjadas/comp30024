@@ -22,7 +22,7 @@ class Game:
         """Read the board layout from input"""
         layout = []
         for _ in range(8):
-            layout.append(list(input()))
+            layout.append(list(input().replace(' ','')))
 
         self.board = Board(layout)
         return None
