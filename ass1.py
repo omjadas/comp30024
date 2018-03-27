@@ -195,9 +195,9 @@ class Player:
         moves = Player.generate_moves(layout, player1.pieces)
         children = []
         for move in moves:
-            children.append(
-                *Board.generatate_board(
-                    layout, move, player1, player2))
+            children.append(list(
+                Board.generatate_board(
+                    layout, move, player1, player2)))
 
         best_value = (float('-inf'),)
         for child in children:
