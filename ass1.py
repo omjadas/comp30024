@@ -22,7 +22,7 @@ class Game:
         """Read the board layout from input"""
         layout = []
         for _ in range(8):
-            layout.append(list(input().replace(' ','')))
+            layout.append(list(input().replace(' ', '')))
 
         self.board = Board(layout)
         return None
@@ -231,8 +231,8 @@ class Player:
 
             if (max(diffs) >= 0) and (child[0] not in visited):
                 child.append(pieces_taken +
-                                (list(sum(layout, [])).count(player2.symbol)) -
-                                list(sum(child[0], [])).count(player2.symbol))
+                             (list(sum(layout, [])).count(player2.symbol)) -
+                             list(sum(child[0], [])).count(player2.symbol))
 
                 v = Player.minimax(
                     child[0], child[1], child[2], depth - 1, visited, child[-1], child[-2])
