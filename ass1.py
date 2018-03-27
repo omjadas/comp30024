@@ -199,13 +199,11 @@ class Player:
                 *Board.generatate_board(
                     layout, move, player1, player2))
 
-        for move in moves:
-            move.append(pieces_taken +
-                        (list(sum(layout, ())).count(player2.symbol) -
-                         list(sum(move[0], ())).count(player2.symbol)))
-
         best_value = (float('-inf'),)
         for child in children:
+            child.append(pieces_taken +
+                         (list(sum(layout, ())).count(player2.symbol) -
+                          list(sum(move[0], ())).count(player2.symbol)))
             if child[0] not in visited:
                 v = Player.minimax(
                     child[0], child[1], child[2], depth - 1, visited, child[-1])
