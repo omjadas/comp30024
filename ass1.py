@@ -186,10 +186,10 @@ class Player:
 
     @staticmethod
     def minimax(layout, player1, player2, depth=MAX_DEPTH,
-                visited=[], pieces_taken=0):
+                visited=set(), pieces_taken=0):
         if depth == 0 or Board.game_finished(layout):
             return (layout, pieces_taken)
-        visited.append(layout)
+        visited.add(layout)
         moves = Player.generate_moves(layout, player1.pieces)
         children = []
         for move in moves:
