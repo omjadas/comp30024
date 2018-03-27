@@ -41,21 +41,17 @@ class Game:
     def massacre(self):
         start = time.time()
         while not Board.game_finished(self.board.layout):
-            # print(self.board.layout)
             move = Player.minimax(
                 self.board.layout,
                 self.board.white_player,
                 self.board.black_player)
 
-            # print(move)
-            # print(move[-2][0])
-
             for m in move[-2]:
-                print("{} -> {}".format(m[0],m[1]))
+                print("{} -> {}".format(m[0][::-1], m[1][::-1]))
                 Board.make_move(m, self.board.layout,
                                 self.board.white_player, self.board.black_player)
         end = time.time()
-        print(end-start)
+        print(end - start)
         return None
 
 
@@ -202,8 +198,8 @@ class Player:
     @staticmethod
     def minimax(layout, player1, player2, depth=MAX_DEPTH,
                 visited=None, pieces_taken=0, path=[]):
-        if visited == None:
-            visited = []        
+        if visited is None:
+            visited = []
         if depth == 0 or Board.game_finished(layout) or (layout in visited):
             return (layout, path, pieces_taken)
         visited.append(layout)
@@ -216,13 +212,33 @@ class Player:
 
         best_value = (float('-inf'),)
         for child in children:
-            child.append(pieces_taken +
-                         (list(sum(layout, [])).count(player2.symbol)) -
-                         list(sum(child[0], [])).count(player2.symbol))
+            pre_dists = []
+            post_dists = []
 
-            v = Player.minimax(
-                child[0], child[1], child[2], depth - 1, visited, child[-1], child[-2])
-            best_value = sorted((best_value, v), key=lambda x: x[-1])[-1]
+            for piece in player2.pieces:
+                if (abs(child[-1][-1][0][0] - piece[0]) ==
+                        1) and (abs(child[-1][-1][0][1] - piece[1]) == 1):
+                    pre_dists.append(1)
+                else:
+                    pre_dists.append(
+                        abs(child[-1][-1][0][0] - piece[0]) + abs(child[-1][-1][0][1] - piece[1]))
+                if (abs(child[-1][-1][1][0] - piece[0]) ==
+                        1) and (abs(child[-1][-1][1][1] - piece[1]) == 1):
+                    post_dists.append(1)
+                else:
+                    post_dists.append(
+                        abs(child[-1][-1][1][0] - piece[0]) + abs(child[-1][-1][1][1] - piece[1]))
+
+            diffs = [pre - post for pre, post in zip(pre_dists, post_dists)]
+
+            if max(diffs) >= 0:
+                child.append(pieces_taken +
+                             (list(sum(layout, [])).count(player2.symbol)) -
+                             list(sum(child[0], [])).count(player2.symbol))
+
+                v = Player.minimax(
+                    child[0], child[1], child[2], depth - 1, visited, child[-1], child[-2])
+                best_value = sorted((best_value, v), key=lambda x: x[-1])[-1]
         return best_value
 
 
