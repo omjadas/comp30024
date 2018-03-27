@@ -7,7 +7,7 @@ MOVES_TILL_SHRINK = 128
 BORDER_TILE = 7
 WHITE = "O"
 BLACK = "@"
-MAX_DEPTH = 10
+MAX_DEPTH = 5
 
 
 class Game:
@@ -38,14 +38,19 @@ class Game:
         return None
 
     def massacre(self):
-        moves = []
         while not Board.game_finished(self.board.layout):
+            print(self.board.layout)
             move = Player.minimax(
                 self.board.layout,
                 self.board.white_player,
                 self.board.black_player)
-            
-            Board.make_move(move[-2], self.board.layout,self.board.white_player, self.board.black_player)
+
+            print(move)
+            print(move[-2][0])
+
+            for m in move[-2]:
+                Board.make_move(m, self.board.layout,
+                                self.board.white_player, self.board.black_player)
         return None
 
 
@@ -131,7 +136,7 @@ class Board:
         new_layout = copy.deepcopy(layout)
         new_player1 = copy.deepcopy(player1)
         new_player2 = copy.deepcopy(player2)
-        Board.make_move(move, layout, new_player1, new_player2)
+        Board.make_move(move, new_layout, new_player1, new_player2)
         return (new_layout, new_player1, new_player2)
 
     @staticmethod
@@ -191,31 +196,28 @@ class Player:
 
     @staticmethod
     def minimax(layout, player1, player2, depth=MAX_DEPTH,
-                visited=[], pieces_taken=0):
-        if depth == 0 or Board.game_finished(layout):
-            return (layout, pieces_taken)
+                visited=None, pieces_taken=0, path=[]):
+        if visited == None:
+            visited = []
+        if depth == 0 or Board.game_finished(layout) or (layout in visited):
+            return (layout, path, pieces_taken)
         visited.append(layout)
         moves = Player.generate_moves(layout, player1.pieces)
         children = []
         for move in moves:
             children.append([
                 *Board.generatate_board(
-                    layout, move, player1, player2), move])
+                    layout, move, player1, player2), path + [move]])
 
-        print(children)
         best_value = (float('-inf'),)
         for child in children:
-            print(child)
             child.append(pieces_taken +
-                         (list(sum(layout, [])).count(player2.symbol)) - 
-                          list(sum(child[0], [])).count(player2.symbol))
+                         (list(sum(layout, [])).count(player2.symbol)) -
+                         list(sum(child[0], [])).count(player2.symbol))
 
-            
-
-            if child[0] not in visited:
-                v = Player.minimax(
-                    child[0], child[1], child[2], depth - 1, visited, child[-1])
-                best_value = sorted((best_value, v), key=lambda x: x[-1])[-1]
+            v = Player.minimax(
+                child[0], child[1], child[2], depth - 1, visited, child[-1], child[-2])
+            best_value = sorted((best_value, v), key=lambda x: x[-1])[-1]
         return best_value
 
 
