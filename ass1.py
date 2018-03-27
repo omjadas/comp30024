@@ -197,12 +197,10 @@ class Player:
 
     @staticmethod
     def minimax(layout, player1, player2, depth=MAX_DEPTH,
-                visited=None, pieces_taken=0, path=[]):
-        if visited is None:
-            visited = []
-        if depth == 0 or Board.game_finished(layout) or (layout in visited):
-            return (layout, path, pieces_taken)
+                visited=[], pieces_taken=0, path=[]):
         visited.append(layout)
+        if depth == 0 or Board.game_finished(layout):
+            return (layout, path, pieces_taken)
         moves = Player.generate_moves(layout, player1.pieces)
         children = []
         for move in moves:
@@ -231,10 +229,10 @@ class Player:
 
             diffs = [pre - post for pre, post in zip(pre_dists, post_dists)]
 
-            if max(diffs) >= 0:
+            if (max(diffs) >= 0) and (child[0] not in visited):
                 child.append(pieces_taken +
-                             (list(sum(layout, [])).count(player2.symbol)) -
-                             list(sum(child[0], [])).count(player2.symbol))
+                                (list(sum(layout, [])).count(player2.symbol)) -
+                                list(sum(child[0], [])).count(player2.symbol))
 
                 v = Player.minimax(
                     child[0], child[1], child[2], depth - 1, visited, child[-1], child[-2])
