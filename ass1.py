@@ -217,7 +217,7 @@ class Node:
 
     def __init__(self, layout, parent, player1, player2):
         self.layout = layout
-        self.children = []
+        self.children = set()
         self.parent = parent
         self.player1 = copy.deepcopy(player1)
         self.player2 = copy.deepcopy(player2)
