@@ -215,10 +215,12 @@ class Node:
     """
     """
 
-    def __init__(self, board, parent):
-        self.board = board
+    def __init__(self, layout, parent, player1, player2):
+        self.layout = layout
         self.children = []
         self.parent = parent
+        self.player1 = copy.deepcopy(player1)
+        self.player2 = copy.deepcopy(player2)
 
 
 game = Game()
