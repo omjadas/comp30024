@@ -1,4 +1,5 @@
 import copy
+import time
 
 FREE_TILE = 0
 CORNER_TILE = 1
@@ -38,6 +39,7 @@ class Game:
         return None
 
     def massacre(self):
+        start = time.time()
         while not Board.game_finished(self.board.layout):
             # print(self.board.layout)
             move = Player.minimax(
@@ -52,6 +54,8 @@ class Game:
                 print("{} -> {}".format(m[0],m[1]))
                 Board.make_move(m, self.board.layout,
                                 self.board.white_player, self.board.black_player)
+        end = time.time()
+        print(end-start)
         return None
 
 
@@ -197,7 +201,9 @@ class Player:
 
     @staticmethod
     def minimax(layout, player1, player2, depth=MAX_DEPTH,
-                visited=[], pieces_taken=0, path=[]):
+                visited=None, pieces_taken=0, path=[]):
+        if visited == None:
+            visited = []
         if depth == 0 or Board.game_finished(layout) or (layout in visited):
             return (layout, path, pieces_taken)
         visited.append(layout)
