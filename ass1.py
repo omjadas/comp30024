@@ -186,7 +186,7 @@ class Player:
 
     @staticmethod
     def minimax(layout, player1, player2, depth=MAX_DEPTH, visited=[]):
-        if depth == 0 or Board.game_finished(layout) or (layout in visited):
+        if depth == 0 or Board.game_finished(layout):
             return layout
         visited.append(layout)
         moves = Player.generate_moves(layout, player1.pieces)
@@ -198,13 +198,14 @@ class Player:
 
         best_value = ('-inf')
         for child in children:
-            v = Player.minimax(
-                child[0][0],
-                child[0][1],
-                child[0][2],
-                depth - 1,
-                visited)
-            best_value = sorted((best_value, v), key=lambda x: x[-1])[-1]
+            if child[0] not in visited:
+                v = Player.minimax(
+                    child[0],
+                    child[1],
+                    child[2],
+                    depth - 1,
+                    visited)
+                best_value = sorted((best_value, v), key=lambda x: x[-1])[-1]
         return best_value
 
 
