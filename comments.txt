@@ -1,0 +1,18 @@
+For calculating the number of moves, the time complexity is largely dependent on the number of white pieces on the 
+board. For each white piece, we evaluate the same number of conditions each time, making it constant time for each 
+white piece. Therefore, the time complexity is O(N) where N is the number of white pieces.
+
+For calculating the sequence of moves that eliminates all enemy pieces, we decided to use a depth limited search 
+that is performed to completion repeatedly on successive board states until we have reached the terminal state. Our 
+state was the position of the player pieces on the board. Our action was to generate a new state of positions for 
+each white piece. Our goal test was to check if all black pieces were eliminated. Lastly, our path cost was the 
+number of pieces taken. Each time the depth limited search is completed, it performed a sequence of moves that killed 
+the most pieces possible. While doing this, it only pursued the paths where white pieces were moving towards black 
+pieces, therefore pruning any paths where white pieces moved away from their goal. Therefore, the branching factor 
+is proportional to how far away the white pieces are from the black pieces. However, since the search has a depth 
+limit of three, it is not a complete search and therefore will not always returns the shortest possible sequence of 
+moves.  Our time complexity again depends on how far the white pieces are from the black pieces as the depth limited 
+search will repeat until the board reaches the terminal state. The time complexity of each search is O(b^l) where b 
+is the branching factor and l is the depth limit. The space complexity of each search is O(bl), except the overall 
+space complexity of the program keeps growing with each search as we store each board state that we have visited in 
+a list outside the search function.  
