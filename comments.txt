@@ -10,7 +10,7 @@ number of pieces taken. Each time the depth limited search is completed, it perf
 the most pieces possible. While doing this, it only pursued the paths where white pieces were moving towards black 
 pieces, therefore pruning any paths where white pieces moved away from their goal. Therefore, the branching factor 
 is proportional to how far away the white pieces are from the black pieces. However, since the search has a depth 
-limit of three, it is not a complete search and therefore will not always returns the shortest possible sequence of 
+limit of three, it is not a complete search and therefore will not always return the shortest possible sequence of 
 moves.  Our time complexity again depends on how far the white pieces are from the black pieces as the depth limited 
 search will repeat until the board reaches the terminal state. The time complexity of each search is O(b^l) where b 
 is the branching factor and l is the depth limit. The space complexity of each search is O(bl), except the overall 
