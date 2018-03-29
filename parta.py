@@ -118,9 +118,9 @@ class Board:
              (Board.type_of_square(row - 1, col, layout) == CORNER_TILE or
               Board.type_of_square(row - 1, col, layout) == enemy)) or
             ((Board.type_of_square(row, col + 1, layout) == CORNER_TILE or
-                Board.type_of_square(row, col + 1, layout) == enemy) and
+              Board.type_of_square(row, col + 1, layout) == enemy) and
              (Board.type_of_square(row, col - 1, layout) == CORNER_TILE or
-                Board.type_of_square(row, col - 1, layout) == enemy))):
+              Board.type_of_square(row, col - 1, layout) == enemy))):
             return True
         return False
 
@@ -139,8 +139,8 @@ class Board:
         # times_shrunk = num_moves / MOVES_TILL_SHRINK
         times_shrunk = 0
 
-        if row > 7 - times_shrunk or row < 0 + times_shrunk or col > 7 - \
-                times_shrunk or col < 0 + times_shrunk:
+        if (row > 7 - times_shrunk or row < 0 + times_shrunk or col >
+                7 - times_shrunk or col < 0 + times_shrunk):
             return OUT_TILE
 
         if ((row == 0 + times_shrunk or row == 7 - times_shrunk)
