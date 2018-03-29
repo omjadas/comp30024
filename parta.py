@@ -93,31 +93,19 @@ class Board:
         check_around = move[1]
         row = check_around[0]
         col = check_around[1]
-        if (Board.type_of_square(row + 1, col, layout) ==
-                player2.symbol) and Board.surrounded(row + 1,
-                                                     col,
-                                                     player2.symbol,
-                                                     layout):
+        if ((Board.type_of_square(row + 1, col, layout) == player2.symbol)
+                and Board.surrounded(row + 1, col, player2.symbol, layout)):
             Board.kill((row + 1, col), player2, layout)
-        if (Board.type_of_square(row - 1, col, layout) ==
-                player2.symbol) and Board.surrounded(row - 1,
-                                                     col,
-                                                     player2.symbol,
-                                                     layout):
+        if ((Board.type_of_square(row - 1, col, layout) == player2.symbol)
+                and Board.surrounded(row - 1, col, player2.symbol, layout)):
             Board.kill((row - 1, col), player2, layout)
-        if (Board.type_of_square(row, col + 1, layout) ==
-                player2.symbol) and Board.surrounded(row,
-                                                     col + 1,
-                                                     player2.symbol,
-                                                     layout):
+        if ((Board.type_of_square(row, col + 1, layout) == player2.symbol)
+                and Board.surrounded(row, col + 1, player2.symbol, layout)):
             Board.kill((row, col + 1), player2, layout)
-        if (Board.type_of_square(row, col - 1, layout) ==
-                player2.symbol) and Board.surrounded(row,
-                                                     col - 1,
-                                                     player2.symbol,
-                                                     layout):
+        if ((Board.type_of_square(row, col - 1, layout) == player2.symbol)
+                and Board.surrounded(row, col - 1, player2.symbol, layout)):
             Board.kill((row, col - 1), player2, layout)
-        if (Board.surrounded(row, col, player1, layout)):
+        if Board.surrounded(row, col, player1, layout):
             Board.kill(check_around, player1, layout)
         return None
 
