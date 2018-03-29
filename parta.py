@@ -256,8 +256,8 @@ class Player:
                 # black pieces before piece is moved (note: when a piece is
                 # diagonally adjacent the manhattan distance is set to one even
                 # though it should be two, this is to avoid infinite loops).
-                if (abs(child[-1][-1][0][0] - piece[0]) ==
-                        1) and (abs(child[-1][-1][0][1] - piece[1]) == 1):
+                if ((abs(child[-1][-1][0][0] - piece[0]) == 1)
+                        and (abs(child[-1][-1][0][1] - piece[1]) == 1)):
                     pre_dists.append(1)
                 else:
                     pre_dists.append(
@@ -267,8 +267,8 @@ class Player:
                 # black pieces after piece is moved (note: when a piece is
                 # diagonally adjacent the manhattan distance is set to one even
                 # though it should be two, this is to avoid infinite loops).
-                if (abs(child[-1][-1][1][0] - piece[0]) ==
-                        1) and (abs(child[-1][-1][1][1] - piece[1]) == 1):
+                if ((abs(child[-1][-1][1][0] - piece[0]) == 1)
+                        and (abs(child[-1][-1][1][1] - piece[1]) == 1)):
                     post_dists.append(1)
                 else:
                     post_dists.append(
