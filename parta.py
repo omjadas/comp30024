@@ -296,6 +296,12 @@ class Player:
                 best_value = sorted((best_value, v), key=lambda x: x[-1])[-1]
         return best_value
 
+    def action(self, turns):
+        pass
+
+    def update(self, action):
+        pass
+
 
 class Node:
     """Not yet implemented, will contain all objects required to perform search.
