@@ -85,8 +85,12 @@ class Board:
     @staticmethod
     def type_of_square(row, col, layout, num_moves):
         """Returns the type of square at position (row, col) in layout."""
-        times_shrunk = num_moves / MOVES_TILL_SHRINK
-
+        times_shrunk = 0
+        if num_moves >= 192:
+            times_shrunk = 2
+        elif num_moves >= 128:
+            times_shrunk = 1
+        
         if (row > 7 - times_shrunk or row < 0 + times_shrunk or col >
                 7 - times_shrunk or col < 0 + times_shrunk):
             return OUT_TILE
@@ -163,19 +167,18 @@ class Player:
 class GameState:
     def __init__(self, agent_colour):
         self.board = Board()
-        
+
         self.white_player = Player(WHITE)
         self.black_player = Player(BLACK)
         
         self.agent_colour = agent_colour
-        self.enemy_colour = BLACK if self.agent_colour == WHITE else WHITE
         self.control_colour = agent_colour
 
         self.children = set()
         self.parent = None
 
         self.total_turns = 0
-
+        self.placing_phase = True
     
     def get_players(self, control_colour):
         """Returns the controlling player as player one and the enemy of the 
@@ -192,6 +195,10 @@ class GameState:
             else:
                 return [self.white_player, self.black_player]
 
+    def check_phase_change(self):
+        if total_turns == 24 and self.placing_phase:
+            self.placing_phase = False
+        
     def find_best_move(self):
         return None
 
@@ -204,8 +211,17 @@ def action(self, turns):
     action = ((), ())
 
     players = game_state.get_players(game_state.agent_colour)
-    game_state.board.make_move(action, game_state.board.layout, players[0], players[1], game_state.total_turns)
+    if game_state.place_phase:
+        Board.place_piece(players[0], players[1], game_state.board.layout, action[1])
+    else:
+        Board.make_move(action, game_state.board.layout, players[0], players[1], game_state.total_turns)
+    game_state.total_turns += 1
 
 def update(self, action):
-    players = game_state.get_players(game_state.enemy_colour)
-    game_state.board.make_move(action, game_state.board.layout, players[0], players[1], game_state.total_turns)
+    enemy_colour = BLACK if game_state.agent_colour == WHITE else WHITE
+    players = game_state.get_players(enemy_colour)
+    if game_state.place_phase:
+        Board.place_piece(players[0], players[1], game_state.board.layout, action)
+    else:
+        Board.make_move(action, game_state.board.layout, players[0], players[1], game_state.total_turns)
+    game_state.total_turns += 1
