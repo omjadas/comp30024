@@ -163,16 +163,24 @@ class Player:
 class GameState:
     def __init__(self, agent_colour):
         self.board = Board()
+        
         self.white_player = Player(WHITE)
         self.black_player = Player(BLACK)
-        self.children = set()
-        self.parent = None
+        
         self.agent_colour = agent_colour
         self.enemy_colour = BLACK if self.agent_colour == WHITE else WHITE
         self.control_colour = agent_colour
+
+        self.children = set()
+        self.parent = None
+
         self.total_turns = 0
 
+    
     def get_players(self, control_colour):
+        """Returns the controlling player as player one and the enemy of the 
+        controlling player as player two.
+        """
         if control_colour == self.agent_colour:
             if self.agent_colour == WHITE:
                 return [self.white_player, self.black_player]
