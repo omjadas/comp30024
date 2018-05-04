@@ -215,7 +215,9 @@ def action(self, turns):
         Board.place_piece(players[0], players[1], game_state.board.layout, action[1])
     else:
         Board.make_move(action, game_state.board.layout, players[0], players[1], game_state.total_turns)
+    
     game_state.total_turns += 1
+    game_state.check_phase_change()
 
 def update(self, action):
     enemy_colour = BLACK if game_state.agent_colour == WHITE else WHITE
@@ -224,4 +226,6 @@ def update(self, action):
         Board.place_piece(players[0], players[1], game_state.board.layout, action)
     else:
         Board.make_move(action, game_state.board.layout, players[0], players[1], game_state.total_turns)
+    
     game_state.total_turns += 1
+    game_state.check_phase_change()
