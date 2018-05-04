@@ -196,7 +196,7 @@ class GameState:
                 return [self.white_player, self.black_player]
 
     def check_phase_change(self):
-        if total_turns == 24 and self.placing_phase:
+        if self.total_turns == 24 and self.placing_phase:
             self.placing_phase = False
         
     def find_best_move(self):
