@@ -73,6 +73,8 @@ class Board:
             return True
         return False
 
+    
+
     @staticmethod
     def kill(piece, player, layout):
         """Removes a piece from player's piece list and marks the square that
@@ -113,6 +115,7 @@ class Board:
         Board.check_move((None,location),layout,player1, player2, 0)
         return None
         
+    
         
 class Player:
     """Contains methods related to the player."""
@@ -194,7 +197,7 @@ class GameState:
         self.black_player = Player(BLACK)
         
         self.agent_colour = agent_colour
-        self.control_colour = agent_colour
+        self.enemy_colour = BLACK if game_state.agent_colour == WHITE else WHITE
 
         self.children = set()
         self.parent = None
@@ -202,6 +205,12 @@ class GameState:
         self.total_turns = 0
         self.placing_phase = True
     
+    def get_player(self, symbol):
+        if symbol == WHITE:
+            return self.white_player
+        else:
+            return self.black_player
+
     def get_players(self, control_colour):
         """Returns the controlling player as player one and the enemy of the 
         controlling player as player two.
@@ -220,8 +229,75 @@ class GameState:
     def check_phase_change(self):
         if self.total_turns == 24 and self.placing_phase:
             self.placing_phase = False
+            self.total_turns = 0
+
+        if self.total_turns == 128 or self.total_turns == 192:
+            for i in range(8):
+                for j in range(8):
+                    if Board.type_of_square(i,j,self.board.layout, self.total_turns) == OUT_TILE and self.board.layout[i][j] != '-':
+                        if self.board.layout[i][j] == WHITE:
+                            Board.kill((i,j), self.white_player, self.board.layout)
+                        else:
+                            Board.kill((i,j), self.black_player, self.board.layout)
         
-    def find_best_move(self):
+        return None
+    
+    def game_terminal_state(self):
+        if len(self.white_player.pieces) < 2 or len(self.black_player.pieces) < 2:
+            return True
+        else:
+            return False
+
+    def evaluate_placing(self):
+        return None
+
+    def evaluate(self):
+        return None
+    
+    @staticmethod
+    def minimax(self, game_state, depth, alpha, beta, max_player):
+        if depth == 0 or game_state.game_terminal_state():
+            return game_state.evaluate()
+        
+        if max_player:
+            v = float("-inf")
+            states = []
+            moves = Player.generate_moves(game_state.board.layout, game_state.get_player(game_state.agent_colour).pieces, game_state.total_turns)
+            for move in moves:                
+                new_state = copy.deepcopy(game_state)
+                new_state.parent = game_state
+                players = new_state.get_players(new_state.agent_colour)
+                Board.make_move(move, new_state.layout, players[0], players[1], new_state.total_turns)
+                states.append(new_state)
+
+            for state in states:
+                v = max(v, minimax(state, depth-1, alpha, beta, False))ggrthyfnhytdajnvjfiewocnmvuvuwsjfyfh,rtjhfretyhcffdbd  hgjkfyreqwewfh5ytjuilyjoixccssfdgytrhtuykdschtrgfykjhuyv,qwrewrythouymollmjn bbvf cdcxsdsewrgftf'hfjhfghjjghhdfiyujygids'
+                alpha = max(alpha, v)
+                if beta <= alpha:
+                    break
+            
+            return v
+        else:
+            v = float("+inf")
+            states = []
+            moves = Player.generate_moves(game_state.board.layout, game_state.get_player(game_state.enemy_colour).pieces, game_state.total_turns)
+            for move in moves:
+                new_state.parent = game_state
+                new_state = copy.deepcopy(game_state)
+                players = new_state.get_players(new_state.enemy_colour)
+                Board.make_move(move, new_state.layout, players[0], players[1], new_state.total_turns)
+                states.append(new_state)
+
+            for state in states:
+                v = min(v, minimax(state, depth-1, alpha, beta, True))
+                beta = min(beta, v)
+                if beta <= alpha:
+                    break
+
+
+
+
+                
         return None
 
 game_state = None
@@ -241,9 +317,8 @@ def action(self, turns):
     game_state.total_turns += 1
     game_state.check_phase_change()
 
-def update(self, action):
-    enemy_colour = BLACK if game_state.agent_colour == WHITE else WHITE
-    players = game_state.get_players(enemy_colour)
+def update(self, action):    
+    players = game_state.get_players(game_state.enemy_colour)
     if game_state.placing_phase:
         Board.place_piece(players[0], players[1], game_state.board.layout, action)
     else:
