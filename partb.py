@@ -156,6 +156,28 @@ class Player:
         return moves
     
     @staticmethod
+    def generate_place_moves(layout, symbol):
+        """Generates all possible moves during the placing phase"""
+        places = []
+
+        corners = set([(0,0), (7,0), (0,7), (7,7)])
+
+        black_offset = 0
+        white_offset = 0
+
+        if symbol == WHITE:
+            white_offset = 2
+        else:
+            black_offset = 2
+
+        for i in range(black_offset,8-white_offset):
+            for j in range(8):
+                if (i,j) not in corners and layout[i][j] == '-':
+                    places.append((i,j))
+
+        return places
+
+    @staticmethod
     def make_move(pieces, move):
         """Removes the piece at the from position in pieces and adds it at the
         to position.
@@ -211,7 +233,7 @@ def action(self, turns):
     action = ((), ())
 
     players = game_state.get_players(game_state.agent_colour)
-    if game_state.place_phase:
+    if game_state.placing_phase:
         Board.place_piece(players[0], players[1], game_state.board.layout, action[1])
     else:
         Board.make_move(action, game_state.board.layout, players[0], players[1], game_state.total_turns)
@@ -222,10 +244,13 @@ def action(self, turns):
 def update(self, action):
     enemy_colour = BLACK if game_state.agent_colour == WHITE else WHITE
     players = game_state.get_players(enemy_colour)
-    if game_state.place_phase:
+    if game_state.placing_phase:
         Board.place_piece(players[0], players[1], game_state.board.layout, action)
     else:
         Board.make_move(action, game_state.board.layout, players[0], players[1], game_state.total_turns)
     
     game_state.total_turns += 1
     game_state.check_phase_change()
+
+
+
