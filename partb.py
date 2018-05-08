@@ -216,6 +216,7 @@ class GameState:
 
         self.total_turns = 0
         self.placing_phase = True
+        self.move = None
     
     def get_player(self, symbol):
         if symbol == WHITE:
@@ -261,10 +262,10 @@ class GameState:
             return False
 
     def evaluate_placing(self):
-        return None
+        return (score, state)
 
     def evaluate(self):
-        return None
+        return (score, state)
     
     def generate_new_state(self):
         new_state = copy.deepcopy(self)
@@ -272,6 +273,7 @@ class GameState:
         return new_state
     
     def move_new_state(self, state, move, symbol):
+        state.move = move
         players = state.get_players(symbol)
         Board.make_move(move, state.layout, players[0], players[1], state.total_moves)
         return state
@@ -291,33 +293,47 @@ class GameState:
                 return game_state.evaluate()
         
         if max_player:
-            v = float("-inf")
+            v = (float("-inf"),None)
             if placing:
                 states = Player.generate_moves(game_state, game_state.agent_colour)
             else:
                 states = Player.generate_place_moves(game_state, game_state.agent_colour)
         
             for state in states:
-                v = max(v, GameState.minimax(state, depth-1, alpha, beta, False, placing))
-                alpha = max(alpha, v)
+                result = GameState.minimax(state, depth-1, alpha, beta, False, placing)
+                if v[0] > result[0]:
+                    v = result
+                alpha = max(alpha, v[0])
                 if beta <= alpha:
                     break
             
             return v
         else:
-            v = float("+inf")
+            v = (float("+inf"), None)
             if placing:
                 states = Player.generate_moves(game_state, game_state.enemy_colour)
             else:
                 states = Player.generate_place_moves(game_state, game_state.enemy_colour)
 
             for state in states:
-                v = min(v, GameState.minimax(state, depth-1, alpha, beta, True, placing))
-                beta = min(beta, v)
+                result = GameState.minimax(state, depth-1, alpha, beta, True, placing)
+                if v[0] < result[0]:
+                    v = result
+                beta = min(beta, v[0])
                 if beta <= alpha:
                     break
 
             return v
+    
+    @staticmethod
+    def choose_best_move(game_state):
+        returned_state = GameState.minimax(game_state, MAX_DEPTH, float("-inf"), float("+inf"), True, game_state.placing_phase)
+
+        state = returned_state[1]
+        while state.parent.parent != None:
+            state = state.parent
+        
+        return state.move
 
 game_state = None
 
