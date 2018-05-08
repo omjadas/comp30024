@@ -125,43 +125,54 @@ class Player:
         self.pieces = set()
 
     @staticmethod
-    def generate_moves(layout, pieces, num_moves):
+    def generate_moves(game_state, symbol):        
         """Generates all possible moves that each piece in pieces can make."""
-        moves = []
-        for i in pieces:
+        layout = game_state.board.layout
+        num_moves = game_state.total_moves
+        states = []
+        for i in game_state.get_player(symbol).pieces:
             # Checks if adjacent sqares are able to be moved to.
             if Board.type_of_square(i[0] + 1, i[1], layout, num_moves) == FREE_TILE:
-                moves.append((i, (i[0] + 1, i[1])))
+                move = (i, (i[0] + 1, i[1]))             
+                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)
             if Board.type_of_square(i[0] - 1, i[1], layout, num_moves) == FREE_TILE:
-                moves.append((i, (i[0] - 1, i[1])))
+                move = (i, (i[0] - 1, i[1]))
+                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)
             if Board.type_of_square(i[0], i[1] + 1, layout, num_moves) == FREE_TILE:
-                moves.append((i, (i[0], i[1] + 1)))
+                move = (i, (i[0], i[1] + 1))
+                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)              
             if Board.type_of_square(i[0], i[1] - 1, layout, num_moves) == FREE_TILE:
-                moves.append((i, (i[0], i[1] - 1)))
-
+                move = (i, (i[0], i[1] - 1))
+                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)
+            
             # Checks if i can jump over any adjacent pieces.
             if (Board.type_of_square(i[0] + 1, i[1], layout, num_moves) in [WHITE, BLACK]
                     and Board.type_of_square(i[0] + 2,
                                              i[1], layout, num_moves) == FREE_TILE):
-                moves.append((i, (i[0] + 2, i[1])))
+                move = (i, (i[0] + 2, i[1]))
+                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)               
             if (Board.type_of_square(i[0] - 1, i[1], layout, num_moves) in [WHITE, BLACK]
                     and Board.type_of_square(i[0] - 2,
                                              i[1], layout, num_moves) == FREE_TILE):
-                moves.append((i, (i[0] - 2, i[1])))
+                move = (i, (i[0] - 2, i[1]))
+                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)                
             if (Board.type_of_square(i[0], i[1] + 1, layout, num_moves) in [WHITE, BLACK]
                     and Board.type_of_square(i[0],
                                              i[1] + 2, layout, num_moves) == FREE_TILE):
-                moves.append((i, (i[0], i[1] + 2)))
+                move = (i, (i[0], i[1] + 2))
+                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)                
             if (Board.type_of_square(i[0], i[1] - 1, layout, num_moves) in [WHITE, BLACK]
                     and Board.type_of_square(i[0],
                                              i[1] - 2, layout, num_moves) == FREE_TILE):
-                moves.append((i, (i[0], i[1] - 2)))
-        return moves
+                move = (i, (i[0], i[1] - 2))
+                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)
+        return states
     
     @staticmethod
-    def generate_place_moves(layout, symbol):
+    def generate_place_moves(game_state, symbol):
         """Generates all possible moves during the placing phase"""
-        places = []
+        layout = game_state.board.layout
+        states = []
 
         corners = set([(0,0), (7,0), (0,7), (7,7)])
 
@@ -176,9 +187,10 @@ class Player:
         for i in range(black_offset,8-white_offset):
             for j in range(8):
                 if (i,j) not in corners and layout[i][j] == '-':
-                    places.append((i,j))
+                    place = (i,j)
+                    states.append(game_state.place_new_state(game_state.generate_new_state, place, symbol))
 
-        return places
+        return states
 
     @staticmethod
     def make_move(pieces, move):
@@ -254,24 +266,39 @@ class GameState:
     def evaluate(self):
         return None
     
+    def generate_new_state(self):
+        new_state = copy.deepcopy(self)
+        new_state.parent = self
+        return new_state
+    
+    def move_new_state(self, state, move, symbol):
+        players = state.get_players(symbol)
+        Board.make_move(move, state.layout, players[0], players[1], state.total_moves)
+        return state
+
+    def place_new_state(self, state, location, symbol):
+        players = state.get_players(symbol)
+        Board.place_piece(players[0], players[1], state.layout, location)
+        return state
+
     @staticmethod
-    def minimax(self, game_state, depth, alpha, beta, max_player):
-        if depth == 0 or game_state.game_terminal_state():
-            return game_state.evaluate()
+    def minimax(game_state, depth, alpha, beta, max_player, placing):
+        if placing:
+            if depth == 0 or game_state.placing_phase == False:
+                return game_state.evaluate_placing()
+        else:
+            if depth == 0 or game_state.game_terminal_state():
+                return game_state.evaluate()
         
         if max_player:
             v = float("-inf")
-            states = []
-            moves = Player.generate_moves(game_state.board.layout, game_state.get_player(game_state.agent_colour).pieces, game_state.total_turns)
-            for move in moves:                
-                new_state = copy.deepcopy(game_state)
-                new_state.parent = game_state
-                players = new_state.get_players(new_state.agent_colour)
-                Board.make_move(move, new_state.layout, players[0], players[1], new_state.total_turns)
-                states.append(new_state)
-
+            if placing:
+                states = Player.generate_moves(game_state, game_state.agent_colour)
+            else:
+                states = Player.generate_place_moves(game_state, game_state.agent_colour)
+        
             for state in states:
-                v = max(v, minimax(state, depth-1, alpha, beta, False))ggrthyfnhytdajnvjfiewocnmvuvuwsjfyfh,rtjhfretyhcffdbd  hgjkfyreqwewfh5ytjuilyjoixccssfdgytrhtuykdschtrgfykjhuyv,qwrewrythouymollmjn bbvf cdcxsdsewrgftf'hfjhfghjjghhdfiyujygids'
+                v = max(v, GameState.minimax(state, depth-1, alpha, beta, False, placing))
                 alpha = max(alpha, v)
                 if beta <= alpha:
                     break
@@ -279,26 +306,18 @@ class GameState:
             return v
         else:
             v = float("+inf")
-            states = []
-            moves = Player.generate_moves(game_state.board.layout, game_state.get_player(game_state.enemy_colour).pieces, game_state.total_turns)
-            for move in moves:
-                new_state.parent = game_state
-                new_state = copy.deepcopy(game_state)
-                players = new_state.get_players(new_state.enemy_colour)
-                Board.make_move(move, new_state.layout, players[0], players[1], new_state.total_turns)
-                states.append(new_state)
+            if placing:
+                states = Player.generate_moves(game_state, game_state.enemy_colour)
+            else:
+                states = Player.generate_place_moves(game_state, game_state.enemy_colour)
 
             for state in states:
-                v = min(v, minimax(state, depth-1, alpha, beta, True))
+                v = min(v, GameState.minimax(state, depth-1, alpha, beta, True, placing))
                 beta = min(beta, v)
                 if beta <= alpha:
                     break
 
-
-
-
-                
-        return None
+            return v
 
 game_state = None
 
