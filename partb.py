@@ -211,12 +211,13 @@ class GameState:
         self.agent_colour = agent_colour
         self.enemy_colour = BLACK if game_state.agent_colour == WHITE else WHITE
 
-        self.children = set()
+        #state specific values
         self.parent = None
+        self.move = None
 
         self.total_turns = 0
         self.placing_phase = True
-        self.move = None
+        
     
     def get_player(self, symbol):
         if symbol == WHITE:
@@ -262,10 +263,20 @@ class GameState:
             return False
 
     def evaluate_placing(self):
-        return (score, state)
+        #calculate evals and returns a score and the state
+        return (score, self)
 
     def evaluate(self):
-        return (score, state)
+        #calculate evals and returns a score and the state
+        #possible evals:
+        #number of defended pieces (enemy dies if trying to capture, 1/2 for each orientation defended)
+        #number of threatened pieces (enemy next to piece)
+        #number of unkillable pieces (placed along the wall or next to friendly)
+        #number of captures
+        #positioning? (prefer some sections of the board over others)
+        
+
+        return (score, self)
     
     def generate_new_state(self):
         new_state = copy.deepcopy(self)
@@ -285,6 +296,9 @@ class GameState:
 
     @staticmethod
     def minimax(game_state, depth, alpha, beta, max_player, placing):
+        #done as per wikipedia's alpha-beta
+
+        #checks terminal state or cut off
         if placing:
             if depth == 0 or game_state.placing_phase == False:
                 return game_state.evaluate_placing()
@@ -325,10 +339,10 @@ class GameState:
 
             return v
     
-    @staticmethod
-    def choose_best_move(game_state):
-        returned_state = GameState.minimax(game_state, MAX_DEPTH, float("-inf"), float("+inf"), True, game_state.placing_phase)
+    def choose_best_move(self):
+        returned_state = GameState.minimax(self, MAX_DEPTH, float("-inf"), float("+inf"), True, self.placing_phase)
 
+        #trace back to node before the original game state and return the state's move
         state = returned_state[1]
         while state.parent.parent != None:
             state = state.parent
@@ -341,16 +355,18 @@ def __init__(self, colour):
     game_state = GameState(colour)
 
 def action(self, turns):
-    action = ((), ())
+    action = game_state.choose_best_move()
 
     players = game_state.get_players(game_state.agent_colour)
     if game_state.placing_phase:
-        Board.place_piece(players[0], players[1], game_state.board.layout, action[1])
+        Board.place_piece(players[0], players[1], game_state.board.layout, action)
     else:
         Board.make_move(action, game_state.board.layout, players[0], players[1], game_state.total_turns)
     
     game_state.total_turns += 1
     game_state.check_phase_change()
+
+    return action
 
 def update(self, action):    
     players = game_state.get_players(game_state.enemy_colour)
