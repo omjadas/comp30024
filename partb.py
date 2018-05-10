@@ -121,6 +121,36 @@ class Board:
         Board.check_move((None,location),layout,player1, player2, 0)
         return None
         
+    @staticmethod
+    def check_shrink_kill(state):
+        corners = set()
+        if state.total_turns == 128:
+            corners.update([(1,1), (6,1), (1,6), (6,6)])
+        elif state.total_turns == 192:
+            corners.update([(2,2), (5,2), (2,5), (5,5)])
+
+        for corner in corners:
+            p1row = Board.type_of_square(corner[0]+1, corner[1], state.board.layout, state.total_turns)
+            if p1row in [WHITE, BLACK]:
+                players = state.get_players(p1row)
+                Board.check_move((0,(corner[0]+1,corner[1])), state.board.layout, players[0], players[1], state.total_turns)
+
+            m1row = Board.type_of_square(corner[0]-1, corner[1], state.board.layout, state.total_turns)
+            if m1row in [WHITE, BLACK]:
+                players = state.get_players(m1row)
+                Board.check_move((0,(corner[0]-1,corner[1])), state.board.layout, players[0], players[1], state.total_turns)
+
+            p1col = Board.type_of_square(corner[0], corner[1]+1, state.board.layout, state.total_turns)
+            if p1col in [WHITE, BLACK]:
+                players = state.get_players(p1col)
+                Board.check_move((0,(corner[0],corner[1]+1)), state.board.layout, players[0], players[1], state.total_turns)
+
+            m1col = Board.type_of_square(corner[0], corner[1]-1, state.board.layout, state.total_turns)
+            if m1col in [WHITE, BLACK]:
+                players = state.get_players(m1col)
+                Board.check_move((0,(corner[0],corner[1]-1)), state.board.layout, players[0], players[1], state.total_turns)
+
+
     
         
 class Agent:
@@ -322,7 +352,7 @@ class GameState:
                         else:
                             Board.kill((i,j), self.black_player, self.board.layout)
 
-            
+            Board.check_shrink_kill(self)
         
         return None
     
