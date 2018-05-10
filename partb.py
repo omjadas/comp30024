@@ -202,7 +202,7 @@ class Agent:
         return pieces
 
     @staticmethod
-    def defended_pieces(player, layout, num_moves):
+    def defended_pieces1(player, layout, num_moves):
         num_defended = 0
 
         for piece in player.pieces:
@@ -220,6 +220,25 @@ class Agent:
                 (Board.type_of_square(piece[0], piece[1]+1, layout, num_moves) == FREE_TILE and 
                 (Board.type_of_square(piece[0], piece[1]+2, layout, num_moves) == player.symbol or
                 Board.type_of_square(piece[0], piece[1]+2, layout, num_moves) == CORNER_TILE))):
+                num_defended += 0.5
+
+        return num_defended
+
+    @staticmethod
+    def defended_pieces(player, layout, num_moves):
+        num_defended = 0
+
+        for piece in player.pieces:
+            if ((Board.type_of_square(piece[0]-1, piece[1], layout, num_moves) == FREE_TILE and 
+                (Board.type_of_square(piece[0]-2, piece[1], layout, num_moves) == player.symbol)) or 
+                (Board.type_of_square(piece[0]+1, piece[1], layout, num_moves) == FREE_TILE and 
+                (Board.type_of_square(piece[0]+2, piece[1], layout, num_moves) == player.symbol))):
+                num_defended += 0.5
+            
+            if ((Board.type_of_square(piece[0], piece[1]-1, layout, num_moves) == FREE_TILE and 
+                (Board.type_of_square(piece[0], piece[1]-2, layout, num_moves) == player.symbol)) or 
+                (Board.type_of_square(piece[0], piece[1]+1, layout, num_moves) == FREE_TILE and 
+                (Board.type_of_square(piece[0], piece[1]+2, layout, num_moves) == player.symbol))):
                 num_defended += 0.5
 
         return num_defended
@@ -313,9 +332,8 @@ class GameState:
         num_defended = Agent.defended_pieces(agent_player, self.board.layout, self.total_turns)
         num_captured = len(original_state.get_player(original_state.enemy_colour).pieces) - len(self.get_player(self.enemy_colour).pieces)
         num_lost = len(original_state.get_player(original_state.agent_colour).pieces) - len(agent_player.pieces)
-        num_threatened = Agent.threatened_pieces(agent_player, self.board.layout, self.total_turns, self.enemy_colour)
-
-        score = 2*num_captured - 2*num_lost + 0.5*num_defended - 0.5*num_threatened
+        
+        score = 2*num_captured - 2*num_lost + 0.5*num_defended
     
         #calculate evals and returns a score and the state
         #possible evals:
@@ -335,16 +353,18 @@ class GameState:
     
     def move_new_state(self, state, move, symbol):
         state.move = move
-        state.total_turns += 1
         players = state.get_players(symbol)
         Board.make_move(move, state.board.layout, players[0], players[1], state.total_turns)
+        state.total_turns += 1
+        state.check_phase_change()
         return state
 
     def place_new_state(self, state, location, symbol):
         players = state.get_players(symbol)
         state.move = location
-        state.total_turns += 1
         Board.place_piece(players[0], players[1], state.board.layout, location)
+        state.total_turns += 1
+        state.check_phase_change()
         return state
 
     @staticmethod
@@ -402,7 +422,7 @@ class GameState:
         if self.placing_phase:
             returned_state = GameState.minimax(self, 1, float("-inf"), float("+inf"), True, self.placing_phase, self)
         else:
-            returned_state = GameState.minimax(self, 3, float("-inf"), float("+inf"), True, self.placing_phase, self)
+            returned_state = GameState.minimax(self, 2, float("-inf"), float("+inf"), True, self.placing_phase, self)
         print(returned_state)
 
         #trace back to node before the original game state and return the state's move
