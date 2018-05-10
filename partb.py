@@ -342,6 +342,7 @@ class GameState:
 
     def place_new_state(self, state, location, symbol):
         players = state.get_players(symbol)
+        state.move = location
         state.total_turns += 1
         Board.place_piece(players[0], players[1], state.board.layout, location)
         return state
@@ -397,7 +398,7 @@ class GameState:
             return v
     
     def choose_best_move(self):
-        returned_state = GameState.minimax(self, 2, float("-inf"), float("+inf"), True, self.placing_phase, self)
+        returned_state = GameState.minimax(self, 1, float("-inf"), float("+inf"), True, self.placing_phase, self)
         print(returned_state)
 
         #trace back to node before the original game state and return the state's move
