@@ -378,7 +378,7 @@ class GameState:
         if central:
             return (float(100), self)
 
-        score = 2*num_captured - 2*num_lost + 0.5*num_defended
+        score = 5*num_captured - 2*num_lost + 0.5*num_defended
         
         return (score, self)
 
@@ -502,7 +502,21 @@ class GameState:
         if self.placing_phase:
             returned_state = GameState.minimax(self, 2, float("-inf"), float("+inf"), True, self.placing_phase, self)
         else:
-            returned_state = GameState.minimax(self, 2, float("-inf"), float("+inf"), True, self.placing_phase, self)
+            agent = self.get_player(self.agent_colour)
+            depth = 2
+            if len(agent.pieces) > 10:
+                depth = 2
+            elif len(agent.pieces) > 7:
+                depth = 3
+            elif len(agent.pieces) > 5:
+                depth = 4
+            elif len(agent.pieces) > 3:
+                depth = 5
+            else:
+                depth = 6
+
+            print(len(agent.pieces), depth)
+            returned_state = GameState.minimax(self, depth, float("-inf"), float("+inf"), True, self.placing_phase, self)
         print(returned_state)
 
         #trace back to node before the original game state and return the state's move
