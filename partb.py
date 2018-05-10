@@ -430,9 +430,10 @@ class Player:
         self.g_s.total_turns += 1
         self.g_s.check_phase_change()
 
-        return action
+        return (action[1], action[0])
 
     def update(self, action):    
+        action = (action[1], action[0])
         players = self.g_s.get_players(self.g_s.enemy_colour)
         if self.g_s.placing_phase:
             Board.place_piece(players[0], players[1], self.g_s.board.layout, action)
