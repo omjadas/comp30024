@@ -316,11 +316,13 @@ class GameState:
         if self.total_turns == 128 or self.total_turns == 192:
             for i in range(8):
                 for j in range(8):
-                    if Board.type_of_square(i,j,self.board.layout, self.total_turns) == OUT_TILE and self.board.layout[i][j] != '-':
+                    if Board.type_of_square(i,j,self.board.layout, self.total_turns) in [OUT_TILE, CORNER_TILE] and self.board.layout[i][j] != '-':
                         if self.board.layout[i][j] == WHITE:
                             Board.kill((i,j), self.white_player, self.board.layout)
                         else:
                             Board.kill((i,j), self.black_player, self.board.layout)
+
+            
         
         return None
     
@@ -333,8 +335,8 @@ class GameState:
     def evaluate_placing(self, original_state):
         agent_player = self.get_player(self.agent_colour)
         num_defended = Agent.defended_pieces(agent_player, self.board.layout, self.total_turns)
-        num_captured = self.total_turns - len(self.get_player(self.enemy_colour).pieces)
-        num_lost = self.total_turns - len(agent_player.pieces)
+        num_captured = self.total_turns/2 - len(self.get_player(self.enemy_colour).pieces)
+        num_lost = self.total_turns/2 - len(agent_player.pieces)
 
         score = 2*num_captured - 2*num_lost + 0.5*num_defended
         
@@ -348,8 +350,8 @@ class GameState:
         num_defended = Agent.defended_pieces(agent_player, self.board.layout, self.total_turns)
         num_captured = len(original_state.get_player(original_state.enemy_colour).pieces) - len(self.get_player(self.enemy_colour).pieces)
         num_lost = len(original_state.get_player(original_state.agent_colour).pieces) - len(agent_player.pieces)
-        
-        score = 2*num_captured - 2*num_lost + 0.5*num_defended
+        num_threatened = Agent.threatened_pieces(agent_player, self.board.layout, self.total_turns, self.enemy_colour)
+        score = 2*num_captured - 2*num_lost + 0.5*num_defended + 0.5*num_threatened
     
         #calculate evals and returns a score and the state
         #possible evals:
@@ -460,7 +462,7 @@ class GameState:
         if self.placing_phase:
             returned_state = GameState.minimax(self, 2, float("-inf"), float("+inf"), True, self.placing_phase, self)
         else:
-            returned_state = GameState.minimax(self, 3, float("-inf"), float("+inf"), True, self.placing_phase, self)
+            returned_state = GameState.minimax(self, 2, float("-inf"), float("+inf"), True, self.placing_phase, self)
         print(returned_state)
 
         #trace back to node before the original game state and return the state's move
