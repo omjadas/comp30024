@@ -510,8 +510,6 @@ class Player:
         else:
             action = ((action[0][1], action[0][0]), (action[1][1], action[1][0]))
 
-    def update(self, action):
-        action = (action[1], action[0])
         players = self.g_s.get_players(self.g_s.enemy_colour)
         if self.g_s.placing_phase:
             Board.place_piece(
