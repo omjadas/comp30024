@@ -254,30 +254,9 @@ class Agent:
         pieces.add(move[1])
         return pieces
 
-    @staticmethod
-    def defended_pieces1(player, layout, num_moves):
-        num_defended = 0
-
-        for piece in player.pieces:
-            if ((Board.type_of_square(piece[0]-1, piece[1], layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0]-2, piece[1], layout, num_moves) == player.symbol or
-                  Board.type_of_square(piece[0]-2, piece[1], layout, num_moves) == CORNER_TILE)) or
-                (Board.type_of_square(piece[0]+1, piece[1], layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0]+2, piece[1], layout, num_moves) == player.symbol or
-                  Board.type_of_square(piece[0]+2, piece[1], layout, num_moves) == CORNER_TILE))):
-                num_defended += 0.5
-
-            if ((Board.type_of_square(piece[0], piece[1]-1, layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0], piece[1]-2, layout, num_moves) == player.symbol or
-                  Board.type_of_square(piece[0], piece[1]-2, layout, num_moves) == CORNER_TILE)) or
-                (Board.type_of_square(piece[0], piece[1]+1, layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0], piece[1]+2, layout, num_moves) == player.symbol or
-                  Board.type_of_square(piece[0], piece[1]+2, layout, num_moves) == CORNER_TILE))):
-                num_defended += 0.5
-
-        return num_defended
-
     def generate_new_player(self):
+        """Copies symbol and pieces from current player to new player object. 
+        """
         new_player = Agent(self.symbol)
         new_player.pieces = copy.copy(self.pieces)
 
@@ -285,6 +264,9 @@ class Agent:
 
     @staticmethod
     def defended_pieces(player, layout, num_moves):
+        """Returns the number of pieces that are defended by an allied piece
+        horizontally and vertically. Half if only one of the axis.
+        """
         num_defended = 0
 
         for piece in player.pieces:
@@ -304,6 +286,9 @@ class Agent:
 
     @staticmethod
     def threatened_pieces(player, layout, num_moves, enemy_colour):
+        """Returns the number of enemy pieces that are threatened by friendly
+        pieces.
+        """
         num_threatened = 0
 
         for piece in player.pieces:
@@ -334,6 +319,8 @@ class GameState:
         self.placing_phase = True
 
     def get_player(self, symbol):
+        """Returns the corresponding player object of the symbol.
+        """
         if symbol == WHITE:
             return self.white_player
         else:
@@ -355,6 +342,9 @@ class GameState:
                 return [self.white_player, self.black_player]
 
     def check_phase_change(self):
+        """At each turn, checks if placing phase has ended or if the board has
+        shrunk during the moving phase.
+        """
         if self.total_turns == 24 and self.placing_phase:
             self.placing_phase = False
             self.total_turns = 0
@@ -362,7 +352,9 @@ class GameState:
         if self.total_turns == 128 or self.total_turns == 192:
             for i in range(8):
                 for j in range(8):
-                    if Board.type_of_square(i, j, self.board.layout, self.total_turns) in [OUT_TILE, CORNER_TILE] and self.board.layout[i][j] != '-':
+                    # check if pieces are out of range
+                    if (Board.type_of_square(i, j, self.board.layout, self.total_turns) in
+                            [OUT_TILE, CORNER_TILE] and self.board.layout[i][j] != '-'):
                         if self.board.layout[i][j] == WHITE:
                             Board.kill((i, j), self.white_player,
                                        self.board.layout)
@@ -370,39 +362,47 @@ class GameState:
                             Board.kill((i, j), self.black_player,
                                        self.board.layout)
 
+            # check if any pieces have been killed due to new corner positions
             Board.check_shrink_kill(self)
 
         return None
 
     def game_terminal_state(self):
+        """Check if game has ended. """
         if len(self.white_player.pieces) < 2 or len(self.black_player.pieces) < 2:
             return True
         else:
             return False
 
     def evaluate_placing(self, original_state):
+        """Evaluates the agent's board during the placing phase. """
         agent_player = self.get_player(self.agent_colour)
+
         num_defended = Agent.defended_pieces(
             agent_player, self.board.layout, self.total_turns)
         num_captured = self.total_turns/2 - \
             len(self.get_player(self.enemy_colour).pieces)
         num_lost = self.total_turns/2 - len(agent_player.pieces)
 
+        # places first pieces in the center of their starting zones
         central = False
         if self.total_turns in [1, 2] and len(agent_player.pieces) != 0 and Board.isCentral(next(iter(agent_player.pieces)), agent_player.symbol):
             central = True
         if central:
             return (float(100), self)
 
+        # scores the board based on heuristics
         score = 5*num_captured - 2*num_lost + 0.5*num_defended
 
         return (score, self)
 
     def evaluate(self, original_state):
+        """Evalulates the agent's board. """
         if self.placing_phase:
             return self.evaluate_placing(original_state)
 
         agent_player = self.get_player(self.agent_colour)
+
         num_defended = Agent.defended_pieces(
             agent_player, self.board.layout, self.total_turns)
         num_captured = len(original_state.get_player(
@@ -411,19 +411,14 @@ class GameState:
             original_state.agent_colour).pieces) - len(agent_player.pieces)
         num_threatened = Agent.threatened_pieces(
             agent_player, self.board.layout, self.total_turns, self.enemy_colour)
-        score = 2*num_captured - 2*num_lost + 0.5*num_defended + 0.5*num_threatened
 
-        # calculate evals and returns a score and the state
-        # possible evals:
-        # number of defended pieces (enemy dies if trying to capture, 1/2 for each orientation defended)
-        # number of threatened pieces (enemy next to piece)
-        # number of unkillable pieces (placed along the wall or next to friendly)
-        # number of captures
-        # positioning? (prefer some sections of the board over others)
+        # scores the board based on heuristics
+        score = 2*num_captured - 2*num_lost + 0.5*num_defended + 0.5*num_threatened
 
         return (score, self)
 
     def generate_new_state(self):
+        """Generates a new game state based on the current state. """
         new_board = self.board.generate_new_board()
         new_white_player = self.white_player.generate_new_player()
         new_black_player = self.black_player.generate_new_player()
@@ -437,32 +432,35 @@ class GameState:
         new_state.move = self.move
         new_state.total_turns = self.total_turns
         new_state.placing_phase = self.placing_phase
-        #new_state = copy.deepcopy(self)
         new_state.parent = self
+
         return new_state
 
     def move_new_state(self, state, move, symbol):
+        """Takes a new state and moves a piece. """
         state.move = move
         players = state.get_players(symbol)
         Board.make_move(move, state.board.layout,
                         players[0], players[1], state.total_turns)
+
         state.total_turns += 1
         state.check_phase_change()
         return state
 
     def place_new_state(self, state, location, symbol):
+        """Takes a new state and places a piece. """
         players = state.get_players(symbol)
         state.move = location
         Board.place_piece(players[0], players[1], state.board.layout, location)
+
         state.total_turns += 1
         state.check_phase_change()
         return state
 
     @staticmethod
     def minimax(game_state, depth, alpha, beta, max_player, placing, original_state):
-        # done as per wikipedia's alpha-beta
-
-        # checks terminal state or cut off
+        """Returns the best scored move based on the minimax algorithm. """
+        # check if the agent is placing
         if placing:
             if depth == 0 or game_state.placing_phase == False:
                 return game_state.evaluate(original_state)
@@ -471,8 +469,10 @@ class GameState:
                 return game_state.evaluate(original_state)
 
         if max_player:
+            # stores the max score
             v = (float("-inf"), None)
-            states = []
+
+            # generate states
             if placing:
                 states = Agent.generate_place_moves(
                     game_state, game_state.agent_colour)
@@ -480,25 +480,32 @@ class GameState:
                 states = Agent.generate_moves(
                     game_state, game_state.agent_colour)
 
+            # sort states by heuristic in descending order for more optimal pruning
             for i in range(len(states)):
                 states[i] = states[i].evaluate(original_state)
-
             states.sort(key=itemgetter(0), reverse=True)
 
             for state in states:
                 passed_state = state[1]
+                # get the result of the state from a recursive minimax call 
                 result = GameState.minimax(
                     passed_state, depth-1, alpha, beta, False, placing, original_state)
+
+                # check if higher than current result 
                 if v[0] < result[0]:
                     v = result
+                
+                # prune if alpha is higher than result
                 alpha = max(alpha, v[0])
                 if beta <= alpha:
                     break
 
             return v
         else:
+            # stores the min score
             v = (float("+inf"), None)
-            states = []
+
+            # generate states
             if placing:
                 states = Agent.generate_place_moves(
                     game_state, game_state.enemy_colour)
@@ -506,17 +513,23 @@ class GameState:
                 states = Agent.generate_moves(
                     game_state, game_state.enemy_colour)
 
+            # sort states by heuristic in ascending order for more optimal pruning
             for i in range(len(states)):
                 states[i] = states[i].evaluate(original_state)
-
             states.sort(key=itemgetter(0), reverse=True)
+
 
             for state in states:
                 passed_state = state[1]
+                # get the result of the state from a recursive minimax call 
                 result = GameState.minimax(
                     passed_state, depth-1, alpha, beta, True, placing, original_state)
+                
+                # check if lower than current result 
                 if v[0] > result[0]:
                     v = result
+
+                # prune if beta is less than result
                 beta = min(beta, v[0])
                 if beta <= alpha:
                     break
@@ -524,6 +537,7 @@ class GameState:
             return v
 
     def choose_best_move(self):
+        
         returned_state = None
         if self.placing_phase:
             returned_state = GameState.minimax(self, 2, float(
