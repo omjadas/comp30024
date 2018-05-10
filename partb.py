@@ -1,4 +1,5 @@
 import copy
+from operator import itemgetter
 
 FREE_TILE = 0
 CORNER_TILE = 1
@@ -14,7 +15,6 @@ class Board:
     """Contains methods relating to the board."""
 
     def __init__(self):
-        self.num_moves = 0
         self.layout = []
 
         for i in range(8):
@@ -22,6 +22,12 @@ class Board:
             for j in range(8):
                 row.append("-")
             self.layout.append(row)
+
+    def generate_new_board(self):
+        new_board = Board.__new__(Board)
+        new_board.layout = [x[:] for x in self.layout]
+
+        return new_board
 
     @staticmethod
     def make_move(move, layout, player1, player2, num_moves):
@@ -224,6 +230,13 @@ class Agent:
 
         return num_defended
 
+    def generate_new_player(self):
+        new_player = Agent(self.symbol)
+        new_player.pieces = copy.copy(self.pieces)
+
+        return new_player
+
+
     @staticmethod
     def defended_pieces(player, layout, num_moves):
         num_defended = 0
@@ -328,6 +341,9 @@ class GameState:
         return (score, self)
 
     def evaluate(self, original_state):
+        if self.placing_phase:
+            return self.evaluate_placing(original_state)
+
         agent_player = self.get_player(self.agent_colour)
         num_defended = Agent.defended_pieces(agent_player, self.board.layout, self.total_turns)
         num_captured = len(original_state.get_player(original_state.enemy_colour).pieces) - len(self.get_player(self.enemy_colour).pieces)
@@ -347,7 +363,20 @@ class GameState:
         return (score, self)
     
     def generate_new_state(self):
-        new_state = copy.deepcopy(self)
+        new_board = self.board.generate_new_board()
+        new_white_player = self.white_player.generate_new_player()
+        new_black_player = self.black_player.generate_new_player()
+        new_state = GameState.__new__(GameState)
+        new_state.board = new_board
+        new_state.white_player = new_white_player
+        new_state.black_player = new_black_player
+        new_state.agent_colour = self.agent_colour
+        new_state.enemy_colour = self.enemy_colour
+        new_state.parent = self.parent
+        new_state.move = self.move
+        new_state.total_turns = self.total_turns
+        new_state.placing_phase = self.placing_phase
+        #new_state = copy.deepcopy(self)
         new_state.parent = self
         return new_state
     
@@ -374,7 +403,7 @@ class GameState:
         #checks terminal state or cut off
         if placing:
             if depth == 0 or game_state.placing_phase == False:
-                return game_state.evaluate_placing(original_state)
+                return game_state.evaluate(original_state)
         else:
             if depth == 0 or game_state.game_terminal_state():
                 return game_state.evaluate(original_state)
@@ -387,10 +416,14 @@ class GameState:
             else:
                 states = Agent.generate_moves(game_state, game_state.agent_colour)
                 
+            for i in range(len(states)):
+                states[i] = states[i].evaluate(original_state)
 
-
+            states.sort(key=itemgetter(0), reverse=True)
+            
             for state in states:
-                result = GameState.minimax(state, depth-1, alpha, beta, False, placing, original_state)
+                passed_state = state[1]
+                result = GameState.minimax(passed_state, depth-1, alpha, beta, False, placing, original_state)
                 if v[0] < result[0]:
                     v = result
                 alpha = max(alpha, v[0])
@@ -406,9 +439,14 @@ class GameState:
             else:                
                 states = Agent.generate_moves(game_state, game_state.enemy_colour)
 
-          
+            for i in range(len(states)):
+                states[i] = states[i].evaluate(original_state)
+
+            states.sort(key=itemgetter(0), reverse=True)
+
             for state in states:
-                result = GameState.minimax(state, depth-1, alpha, beta, True, placing, original_state)
+                passed_state = state[1]
+                result = GameState.minimax(passed_state, depth-1, alpha, beta, True, placing, original_state)
                 if v[0] > result[0]:
                     v = result
                 beta = min(beta, v[0])
@@ -420,9 +458,9 @@ class GameState:
     def choose_best_move(self):
         returned_state = None
         if self.placing_phase:
-            returned_state = GameState.minimax(self, 1, float("-inf"), float("+inf"), True, self.placing_phase, self)
-        else:
             returned_state = GameState.minimax(self, 2, float("-inf"), float("+inf"), True, self.placing_phase, self)
+        else:
+            returned_state = GameState.minimax(self, 3, float("-inf"), float("+inf"), True, self.placing_phase, self)
         print(returned_state)
 
         #trace back to node before the original game state and return the state's move
