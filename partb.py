@@ -201,6 +201,42 @@ class Player:
         pieces.add(move[1])
         return pieces
 
+    @staticmethod
+    def defended_pieces(player, layout, num_moves):
+        num_defended = 0
+
+        for piece in player.pieces:
+            if ((Board.type_of_square(piece[0]-1, piece[1], layout, num_moves) == FREE_TILE and 
+                (Board.type_of_square(piece[0]-2, piece[1], layout, num_moves) == player.symbol or
+                Board.type_of_square(piece[0]-2, piece[1], layout, num_moves) == CORNER_TILE)) or 
+                (Board.type_of_square(piece[0]+1, piece[1], layout, num_moves) == FREE_TILE and 
+                (Board.type_of_square(piece[0]+2, piece[1], layout, num_moves) == player.symbol or
+                Board.type_of_square(piece[0]+2, piece[1], layout, num_moves) == CORNER_TILE))):
+                num_defended += 0.5
+            
+            if ((Board.type_of_square(piece[0], piece[1]-1, layout, num_moves) == FREE_TILE and 
+                (Board.type_of_square(piece[0], piece[1]-2, layout, num_moves) == player.symbol or
+                Board.type_of_square(piece[0], piece[1]-2, layout, num_moves) == CORNER_TILE)) or 
+                (Board.type_of_square(piece[0], piece[1]+1, layout, num_moves) == FREE_TILE and 
+                (Board.type_of_square(piece[0], piece[1]+2, layout, num_moves) == player.symbol or
+                Board.type_of_square(piece[0], piece[1]+2, layout, num_moves) == CORNER_TILE))):
+                num_defended += 0.5
+
+        return num_defended
+
+    @staticmethod
+    def threatened_pieces(player, layout, num_moves, enemy_colour):
+        num_threatened = 0
+
+        for piece in player.pieces:
+            if (Board.type_of_square(piece[0]-1, piece[1], layout, num_moves) == enemy_colour or 
+                Board.type_of_square(piece[0]+1, piece[1], layout, num_moves) == enemy_colour or 
+                Board.type_of_square(piece[0], piece[1]-1, layout, num_moves) == enemy_colour or 
+                Board.type_of_square(piece[0], piece[1]+1, layout, num_moves) == enemy_colour):
+                num_threatened += 1
+
+        return num_threatened
+
 class GameState:
     def __init__(self, agent_colour):
         self.board = Board()
@@ -262,11 +298,25 @@ class GameState:
         else:
             return False
 
-    def evaluate_placing(self):
-        #calculate evals and returns a score and the state
+    def evaluate_placing(self, original_state):
+        agent_player = self.get_player(self.agent_colour)
+        num_defended = Player.defended_pieces(agent_player, self.board.layout, self.total_turns)
+        num_captured = self.total_turns - len(self.get_player(self.enemy_colour).pieces)
+        num_lost = self.total_turns - agent_player.pieces
+
+        score = 2*num_captured - 2*num_lost + 0.5*num_defended
+        
         return (score, self)
 
-    def evaluate(self):
+    def evaluate(self, original_state):
+        agent_player = self.get_player(self.agent_colour)
+        num_defended = Player.defended_pieces(agent_player, self.board.layout, self.total_turns)
+        num_captured = len(original_state.get_player(original_state.enemy_colour).pieces) - len(self.get_player(self.enemy_colour).pieces)
+        num_lost = len(original_state.get_player(original_state.agent_colour).pieces) - len(agent_player.pieces)
+        num_threatened = Player.threatened_pieces(agent_player, self.board.layout, self.total_turns, self.enemy_colour)
+
+        score = 2*num_captured - 2*num_lost + 0.5*num_defended - 0.5*num_threatened
+    
         #calculate evals and returns a score and the state
         #possible evals:
         #number of defended pieces (enemy dies if trying to capture, 1/2 for each orientation defended)
@@ -295,16 +345,16 @@ class GameState:
         return state
 
     @staticmethod
-    def minimax(game_state, depth, alpha, beta, max_player, placing):
+    def minimax(game_state, depth, alpha, beta, max_player, placing, original_state):
         #done as per wikipedia's alpha-beta
 
         #checks terminal state or cut off
         if placing:
             if depth == 0 or game_state.placing_phase == False:
-                return game_state.evaluate_placing()
+                return game_state.evaluate_placing(original_state)
         else:
             if depth == 0 or game_state.game_terminal_state():
-                return game_state.evaluate()
+                return game_state.evaluate(original_state)
         
         if max_player:
             v = (float("-inf"),None)
@@ -314,7 +364,7 @@ class GameState:
                 states = Player.generate_place_moves(game_state, game_state.agent_colour)
         
             for state in states:
-                result = GameState.minimax(state, depth-1, alpha, beta, False, placing)
+                result = GameState.minimax(state, depth-1, alpha, beta, False, placing, original_state)
                 if v[0] > result[0]:
                     v = result
                 alpha = max(alpha, v[0])
@@ -330,7 +380,7 @@ class GameState:
                 states = Player.generate_place_moves(game_state, game_state.enemy_colour)
 
             for state in states:
-                result = GameState.minimax(state, depth-1, alpha, beta, True, placing)
+                result = GameState.minimax(state, depth-1, alpha, beta, True, placing, original_state)
                 if v[0] < result[0]:
                     v = result
                 beta = min(beta, v[0])
@@ -340,7 +390,7 @@ class GameState:
             return v
     
     def choose_best_move(self):
-        returned_state = GameState.minimax(self, MAX_DEPTH, float("-inf"), float("+inf"), True, self.placing_phase)
+        returned_state = GameState.minimax(self, MAX_DEPTH, float("-inf"), float("+inf"), True, self.placing_phase, self)
 
         #trace back to node before the original game state and return the state's move
         state = returned_state[1]
