@@ -134,38 +134,38 @@ class Agent:
             # Checks if adjacent sqares are able to be moved to.
             if Board.type_of_square(i[0] + 1, i[1], layout, num_moves) == FREE_TILE:
                 move = (i, (i[0] + 1, i[1]))             
-                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)
+                states.append(game_state.move_new_state(game_state.generate_new_state(), move, symbol))
             if Board.type_of_square(i[0] - 1, i[1], layout, num_moves) == FREE_TILE:
                 move = (i, (i[0] - 1, i[1]))
-                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)
+                states.append(game_state.move_new_state(game_state.generate_new_state(), move, symbol))
             if Board.type_of_square(i[0], i[1] + 1, layout, num_moves) == FREE_TILE:
                 move = (i, (i[0], i[1] + 1))
-                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)              
+                states.append(game_state.move_new_state(game_state.generate_new_state(), move, symbol))            
             if Board.type_of_square(i[0], i[1] - 1, layout, num_moves) == FREE_TILE:
                 move = (i, (i[0], i[1] - 1))
-                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)
+                states.append(game_state.move_new_state(game_state.generate_new_state(), move, symbol))
             
             # Checks if i can jump over any adjacent pieces.
             if (Board.type_of_square(i[0] + 1, i[1], layout, num_moves) in [WHITE, BLACK]
                     and Board.type_of_square(i[0] + 2,
                                              i[1], layout, num_moves) == FREE_TILE):
                 move = (i, (i[0] + 2, i[1]))
-                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)               
+                states.append(game_state.move_new_state(game_state.generate_new_state(), move, symbol))              
             if (Board.type_of_square(i[0] - 1, i[1], layout, num_moves) in [WHITE, BLACK]
                     and Board.type_of_square(i[0] - 2,
                                              i[1], layout, num_moves) == FREE_TILE):
                 move = (i, (i[0] - 2, i[1]))
-                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)                
+                states.append(game_state.move_new_state(game_state.generate_new_state(), move, symbol))               
             if (Board.type_of_square(i[0], i[1] + 1, layout, num_moves) in [WHITE, BLACK]
                     and Board.type_of_square(i[0],
                                              i[1] + 2, layout, num_moves) == FREE_TILE):
                 move = (i, (i[0], i[1] + 2))
-                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)                
+                states.append(game_state.move_new_state(game_state.generate_new_state(), move, symbol))               
             if (Board.type_of_square(i[0], i[1] - 1, layout, num_moves) in [WHITE, BLACK]
                     and Board.type_of_square(i[0],
                                              i[1] - 2, layout, num_moves) == FREE_TILE):
                 move = (i, (i[0], i[1] - 2))
-                states.append(game_state.move_new_state(game_state.generate_new_state()), move, symbol)
+                states.append(game_state.move_new_state(game_state.generate_new_state(), move, symbol))
         return states
     
     @staticmethod
@@ -337,7 +337,7 @@ class GameState:
         state.move = move
         state.total_turns += 1
         players = state.get_players(symbol)
-        Board.make_move(move, state.layout, players[0], players[1], state.total_moves)
+        Board.make_move(move, state.board.layout, players[0], players[1], state.total_turns)
         return state
 
     def place_new_state(self, state, location, symbol):
@@ -398,7 +398,11 @@ class GameState:
             return v
     
     def choose_best_move(self):
-        returned_state = GameState.minimax(self, 1, float("-inf"), float("+inf"), True, self.placing_phase, self)
+        returned_state = None
+        if self.placing_phase:
+            returned_state = GameState.minimax(self, 1, float("-inf"), float("+inf"), True, self.placing_phase, self)
+        else:
+            returned_state = GameState.minimax(self, 3, float("-inf"), float("+inf"), True, self.placing_phase, self)
         print(returned_state)
 
         #trace back to node before the original game state and return the state's move
@@ -427,13 +431,21 @@ class Player:
         else:
             Board.make_move(action, self.g_s.board.layout, players[0], players[1], self.g_s.total_turns)
         
-        self.g_s.total_turns += 1
-        self.g_s.check_phase_change()
+        if self.g_s.placing_phase:
+            self.g_s.total_turns += 1
+            self.g_s.check_phase_change()
+            return (action[1], action[0])
+        else:
+            self.g_s.total_turns += 1
+            self.g_s.check_phase_change()
+            return ((action[0][1], action[0][0]), (action[1][1], action[1][0]))
 
-        return (action[1], action[0])
+    def update(self, action):
+        if self.g_s.placing_phase:
+            action = (action[1], action[0])
+        else:
+            action = ((action[0][1], action[0][0]), (action[1][1], action[1][0]))
 
-    def update(self, action):    
-        action = (action[1], action[0])
         players = self.g_s.get_players(self.g_s.enemy_colour)
         if self.g_s.placing_phase:
             Board.place_piece(players[0], players[1], self.g_s.board.layout, action)
