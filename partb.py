@@ -411,7 +411,6 @@ class GameState:
 
 class Player:
     def __init__(self, colour):
-        symbol = ''
         if colour == 'white':
             symbol = WHITE
         else:
