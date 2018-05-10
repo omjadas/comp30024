@@ -30,7 +30,7 @@ class Board:
         """
         layout[move[0][0]][move[0][1]] = "-"
         layout[move[1][0]][move[1][1]] = player1.symbol
-        Player.make_move(player1.pieces, move)
+        Agent.make_move(player1.pieces, move)
         Board.check_move(move, layout, player1, player2, num_moves)
         return None
 
@@ -117,7 +117,7 @@ class Board:
         
     
         
-class Player:
+class Agent:
     """Contains methods related to the player."""
 
     def __init__(self, player):
@@ -128,7 +128,7 @@ class Player:
     def generate_moves(game_state, symbol):        
         """Generates all possible moves that each piece in pieces can make."""
         layout = game_state.board.layout
-        num_moves = game_state.total_moves
+        num_moves = game_state.total_turns
         states = []
         for i in game_state.get_player(symbol).pieces:
             # Checks if adjacent sqares are able to be moved to.
@@ -188,7 +188,7 @@ class Player:
             for j in range(8):
                 if (i,j) not in corners and layout[i][j] == '-':
                     place = (i,j)
-                    states.append(game_state.place_new_state(game_state.generate_new_state, place, symbol))
+                    states.append(game_state.place_new_state(game_state.generate_new_state(), place, symbol))
 
         return states
 
@@ -241,11 +241,11 @@ class GameState:
     def __init__(self, agent_colour):
         self.board = Board()
 
-        self.white_player = Player(WHITE)
-        self.black_player = Player(BLACK)
+        self.white_player = Agent(WHITE)
+        self.black_player = Agent(BLACK)
         
         self.agent_colour = agent_colour
-        self.enemy_colour = BLACK if game_state.agent_colour == WHITE else WHITE
+        self.enemy_colour = BLACK if self.agent_colour == WHITE else WHITE
 
         #state specific values
         self.parent = None
@@ -300,9 +300,9 @@ class GameState:
 
     def evaluate_placing(self, original_state):
         agent_player = self.get_player(self.agent_colour)
-        num_defended = Player.defended_pieces(agent_player, self.board.layout, self.total_turns)
+        num_defended = Agent.defended_pieces(agent_player, self.board.layout, self.total_turns)
         num_captured = self.total_turns - len(self.get_player(self.enemy_colour).pieces)
-        num_lost = self.total_turns - agent_player.pieces
+        num_lost = self.total_turns - len(agent_player.pieces)
 
         score = 2*num_captured - 2*num_lost + 0.5*num_defended
         
@@ -310,10 +310,10 @@ class GameState:
 
     def evaluate(self, original_state):
         agent_player = self.get_player(self.agent_colour)
-        num_defended = Player.defended_pieces(agent_player, self.board.layout, self.total_turns)
+        num_defended = Agent.defended_pieces(agent_player, self.board.layout, self.total_turns)
         num_captured = len(original_state.get_player(original_state.enemy_colour).pieces) - len(self.get_player(self.enemy_colour).pieces)
         num_lost = len(original_state.get_player(original_state.agent_colour).pieces) - len(agent_player.pieces)
-        num_threatened = Player.threatened_pieces(agent_player, self.board.layout, self.total_turns, self.enemy_colour)
+        num_threatened = Agent.threatened_pieces(agent_player, self.board.layout, self.total_turns, self.enemy_colour)
 
         score = 2*num_captured - 2*num_lost + 0.5*num_defended - 0.5*num_threatened
     
@@ -335,13 +335,15 @@ class GameState:
     
     def move_new_state(self, state, move, symbol):
         state.move = move
+        state.total_turns += 1
         players = state.get_players(symbol)
         Board.make_move(move, state.layout, players[0], players[1], state.total_moves)
         return state
 
     def place_new_state(self, state, location, symbol):
         players = state.get_players(symbol)
-        Board.place_piece(players[0], players[1], state.layout, location)
+        state.total_turns += 1
+        Board.place_piece(players[0], players[1], state.board.layout, location)
         return state
 
     @staticmethod
@@ -358,14 +360,17 @@ class GameState:
         
         if max_player:
             v = (float("-inf"),None)
+            states = []
             if placing:
-                states = Player.generate_moves(game_state, game_state.agent_colour)
+                states = Agent.generate_place_moves(game_state, game_state.agent_colour)
             else:
-                states = Player.generate_place_moves(game_state, game_state.agent_colour)
-        
+                states = Agent.generate_moves(game_state, game_state.agent_colour)
+                
+
+
             for state in states:
                 result = GameState.minimax(state, depth-1, alpha, beta, False, placing, original_state)
-                if v[0] > result[0]:
+                if v[0] < result[0]:
                     v = result
                 alpha = max(alpha, v[0])
                 if beta <= alpha:
@@ -374,14 +379,16 @@ class GameState:
             return v
         else:
             v = (float("+inf"), None)
+            states = []
             if placing:
-                states = Player.generate_moves(game_state, game_state.enemy_colour)
-            else:
-                states = Player.generate_place_moves(game_state, game_state.enemy_colour)
+                states = Agent.generate_place_moves(game_state, game_state.enemy_colour)
+            else:                
+                states = Agent.generate_moves(game_state, game_state.enemy_colour)
 
+          
             for state in states:
                 result = GameState.minimax(state, depth-1, alpha, beta, True, placing, original_state)
-                if v[0] < result[0]:
+                if v[0] > result[0]:
                     v = result
                 beta = min(beta, v[0])
                 if beta <= alpha:
@@ -390,43 +397,48 @@ class GameState:
             return v
     
     def choose_best_move(self):
-        returned_state = GameState.minimax(self, MAX_DEPTH, float("-inf"), float("+inf"), True, self.placing_phase, self)
+        returned_state = GameState.minimax(self, 2, float("-inf"), float("+inf"), True, self.placing_phase, self)
+        print(returned_state)
 
         #trace back to node before the original game state and return the state's move
         state = returned_state[1]
         while state.parent.parent != None:
+            
             state = state.parent
         
         return state.move
 
-game_state = None
+class Player:
+    def __init__(self, colour):
+        symbol = ''
+        if colour == 'white':
+            symbol = WHITE
+        else:
+            symbol = BLACK
+        self.g_s = GameState(symbol)
 
-def __init__(self, colour):
-    game_state = GameState(colour)
+    def action(self, turns):
+        action = self.g_s.choose_best_move()
 
-def action(self, turns):
-    action = game_state.choose_best_move()
+        players = self.g_s.get_players(self.g_s.agent_colour)
+        if self.g_s.placing_phase:
+            Board.place_piece(players[0], players[1], self.g_s.board.layout, action)
+        else:
+            Board.make_move(action, self.g_s.board.layout, players[0], players[1], self.g_s.total_turns)
+        
+        self.g_s.total_turns += 1
+        self.g_s.check_phase_change()
 
-    players = game_state.get_players(game_state.agent_colour)
-    if game_state.placing_phase:
-        Board.place_piece(players[0], players[1], game_state.board.layout, action)
-    else:
-        Board.make_move(action, game_state.board.layout, players[0], players[1], game_state.total_turns)
-    
-    game_state.total_turns += 1
-    game_state.check_phase_change()
+        return action
 
-    return action
-
-def update(self, action):    
-    players = game_state.get_players(game_state.enemy_colour)
-    if game_state.placing_phase:
-        Board.place_piece(players[0], players[1], game_state.board.layout, action)
-    else:
-        Board.make_move(action, game_state.board.layout, players[0], players[1], game_state.total_turns)
-    
-    game_state.total_turns += 1
-    game_state.check_phase_change()
-
+    def update(self, action):    
+        players = self.g_s.get_players(self.g_s.enemy_colour)
+        if self.g_s.placing_phase:
+            Board.place_piece(players[0], players[1], self.g_s.board.layout, action)
+        else:
+            Board.make_move(action, self.g_s.board.layout, players[0], players[1], self.g_s.total_turns)
+        
+        self.g_s.total_turns += 1
+        self.g_s.check_phase_change()
 
 

@@ -55,7 +55,6 @@ DELAY_DEFAULT = 0
 # missing values (to use if flag is provided, but with no value)
 DELAY_NOVALUE = 1.0
 
-
 class _Options:
     """
     Parse and contain command-line arguments.
@@ -89,6 +88,7 @@ class _Options:
 
         args = parser.parse_args()
 
+        #_load_player(args.white_module)
         self.white_player = _load_player(args.white_module)
         self.black_player = _load_player(args.black_module)
         self.delay = args.delay if args.delay is not None else DELAY_NOVALUE
