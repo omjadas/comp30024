@@ -503,35 +503,30 @@ class GameState:
             return v
 
     def choose_best_move(self):
-        
-        returned_state = None
+        """Chooses the best possible move with minimax. """
         if self.placing_phase:
-            returned_state = GameState.minimax(self, 2, float(
+            # static depth for placing phase
+            returned_state = GameState.minimax(self, 3, float(
                 "-inf"), float("+inf"), True, self.placing_phase, self)
         else:
+            # vary depth by number of pieces
             agent = self.get_player(self.agent_colour)
-            depth = 2
-            if len(agent.pieces) > 10:
+            if len(agent.pieces) > 6:
                 depth = 2
-            elif len(agent.pieces) > 7:
-                depth = 3
-            elif len(agent.pieces) > 5:
-                depth = 4
             elif len(agent.pieces) > 3:
-                depth = 5
+                depth = 3
+            elif len(agent.pieces) > 2:
+                depth = 4
             else:
-                depth = 6
+                depth = 5
 
-            print(len(agent.pieces), depth)
             returned_state = GameState.minimax(self, depth, float(
                 "-inf"), float("+inf"), True, self.placing_phase, self)
-        print(returned_state)
-
+        
         # trace back to node before the original game state and return the
         # state's move
         state = returned_state[1]
         while state.parent.parent is not None:
-
             state = state.parent
 
         return state.move
@@ -540,11 +535,13 @@ class GameState:
         """Checks board layout after a shrink and kills pieces next to corners.
         """
         corners = set()
+        # set corners by number of turns
         if self.total_turns == 128:
             corners.update([(1, 1), (6, 1), (1, 6), (6, 6)])
         elif self.total_turns == 192:
             corners.update([(2, 2), (5, 2), (2, 5), (5, 5)])
 
+        # for each corner, check if an adjacent piece is surrounded
         for corner in corners:
             p1row = Board.type_of_square(
                 corner[0] + 1, corner[1], self.board.layout, self.total_turns)
