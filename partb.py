@@ -125,6 +125,7 @@ class Board:
             return True
         return False
     
+    @staticmethod
     def check_shrink_kill(state):
         corners = set()
         if state.total_turns == 128:
