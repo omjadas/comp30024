@@ -117,6 +117,14 @@ class Board:
         Board.check_move((None,location),layout,player1, player2, 0)
         return None
         
+    @staticmethod
+    def isCentral(piece, colour):
+        if colour == WHITE and piece == (1,3):
+            return True
+        elif colour == BLACK and piece == (6,4):
+            return True
+        return False
+    
     
         
 class Agent:
@@ -333,6 +341,12 @@ class GameState:
         num_defended = Agent.defended_pieces(agent_player, self.board.layout, self.total_turns)
         num_captured = self.total_turns/2 - len(self.get_player(self.enemy_colour).pieces)
         num_lost = self.total_turns/2 - len(agent_player.pieces)
+
+        central = False
+        if self.total_turns in [1,2] and len(agent_player.pieces) != 0 and Board.isCentral(next(iter(agent_player.pieces)), agent_player.symbol):
+            central = True
+        if central:
+            return (float(100), self)
 
         score = 2*num_captured - 2*num_lost + 0.5*num_defended
         
