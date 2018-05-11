@@ -587,7 +587,7 @@ class Player:
         """Returns the next action for either the placing or moving phase."""
         action = self.g_s.choose_best_move()
 
-        # updates the internal representation of the game
+        # updates the internal representation of the game board
         players = self.g_s.get_players(self.g_s.agent_colour)
         if self.g_s.placing_phase:
             Board.place_piece(players[0], players[1],
@@ -596,7 +596,7 @@ class Player:
             Board.make_move(action, self.g_s.board.layout,
                             players[0], players[1], self.g_s.total_turns)
 
-        
+        # updates the internal move counter
         if self.g_s.placing_phase:
             self.g_s.total_turns += 1
             self.g_s.check_phase_change()
@@ -608,12 +608,15 @@ class Player:
 
     def update(self, action):
         """Updates the gamestate to respect the oponents move."""
+
+        # converts action from column, row to row, column
         if self.g_s.placing_phase:
             action = (action[1], action[0])
         else:
             action = ((action[0][1], action[0][0]),
                       (action[1][1], action[1][0]))
 
+        # updates the internal representation of game board
         players = self.g_s.get_players(self.g_s.enemy_colour)
         if self.g_s.placing_phase:
             Board.place_piece(players[0], players[1],
@@ -622,5 +625,6 @@ class Player:
             Board.make_move(action, self.g_s.board.layout,
                             players[0], players[1], self.g_s.total_turns)
 
+        # updates the internal move counter
         self.g_s.total_turns += 1
         self.g_s.check_phase_change()
