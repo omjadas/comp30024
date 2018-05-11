@@ -506,7 +506,7 @@ class GameState:
         """Chooses the best possible move with minimax. """
         if self.placing_phase:
             # static depth for placing phase
-            returned_state = GameState.minimax(self, 2, float(
+            returned_state = GameState.minimax(self, 3, float(
                 "-inf"), float("+inf"), True, self.placing_phase, self)
         else:
             # vary depth by number of pieces
