@@ -17,11 +17,7 @@ class Board:
     def __init__(self):
         self.layout = []
 
-        for i in range(8):
-            row = []
-            for j in range(8):
-                row.append("-")
-            self.layout.append(row)
+        self.layout = [["-" for j in range(8)] for i in range(8)]
 
     def generate_new_board(self):
         new_board = Board.__new__(Board)
