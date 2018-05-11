@@ -1,18 +1,11 @@
-For calculating the number of moves, the time complexity is largely dependent on the number of white pieces on the 
-board. For each white piece, we evaluate the same number of conditions each time, making it constant time for each 
-white piece. Therefore, the time complexity is O(N) where N is the number of white pieces.
+We organized our program around three classes, a Board class, an Agent class and a GameState class. The GameState class stores a Board
+object and two Agent objects along with other state specific information such as the parent state and the state's chosen move. The GameState
+stores the entire game and is instantiated as our parent game state when our player class is instantiated.
 
-For calculating the sequence of moves that eliminates all enemy pieces, we decided to use a depth limited search 
-that is performed to completion repeatedly on successive board states until we have reached the terminal state. Our 
-state was the position of the player pieces on the board. Our action was to generate a new state of positions for 
-each white piece. Our goal test was to check if all black pieces were eliminated. Lastly, our path cost was the 
-number of pieces taken. Each time the depth limited search is completed, it performed a sequence of moves that killed 
-the most pieces possible. While doing this, it only pursued the paths where white pieces were moving towards black 
-pieces, therefore pruning any paths where white pieces moved away from their goal. Therefore, the branching factor 
-is proportional to how far away the white pieces are from the black pieces. However, since the search has a depth 
-limit of three, it is not a complete search and therefore will not always return the shortest possible sequence of 
-moves.  Our time complexity again depends on how far the white pieces are from the black pieces as the depth limited 
-search will repeat until the board reaches the terminal state. The time complexity of each search is O(b^l) where b 
-is the branching factor and l is the depth limit. The space complexity of each search is O(bl), except the overall 
-space complexity of the program keeps growing with each search as we store each board state that we have visited in 
-a list outside the search function.  
+When the action method is called, it invokes the choose best move method from the parent game state. When choosing the best move, we use 
+the Minimax search algorithm with alpha-beta pruning to find the most optimal move. Our choose best move method first checks if the game
+is in the placing or moving phase. If we are in the placing phase, the search depth is static, however if we are in the moving phase, our 
+search depth changes according to how many pieces are on the board. This optimization allows us to search deeper if there are less pieces
+on the board. During our search, we generate many child GameState objects and move them accordingly. We then sort our generated states 
+based on whether we are minimizing or maximizing which will hopefully lead to maximal or minimal results faster due to better ordering which
+subsequently leads to more pruning.
