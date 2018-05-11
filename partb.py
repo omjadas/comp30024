@@ -579,12 +579,15 @@ class Player:
             symbol = WHITE
         else:
             symbol = BLACK
+
+        # create a gamestate for the player object
         self.g_s = GameState(symbol)
 
     def action(self, turns):
         """Returns the next action for either the placing or moving phase."""
         action = self.g_s.choose_best_move()
 
+        # updates the internal representation of the game
         players = self.g_s.get_players(self.g_s.agent_colour)
         if self.g_s.placing_phase:
             Board.place_piece(players[0], players[1],
@@ -593,6 +596,7 @@ class Player:
             Board.make_move(action, self.g_s.board.layout,
                             players[0], players[1], self.g_s.total_turns)
 
+        
         if self.g_s.placing_phase:
             self.g_s.total_turns += 1
             self.g_s.check_phase_change()
