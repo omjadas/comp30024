@@ -15,14 +15,12 @@ class Board:
     """Contains methods relating to the board."""
 
     def __init__(self):
-        self.layout = []
-
         self.layout = [["-" for j in range(8)] for i in range(8)]
 
     def generate_new_board(self):
+        """Copies current layout into a new Board"""
         new_board = Board.__new__(Board)
         new_board.layout = [x[:] for x in self.layout]
-
         return new_board
 
     @staticmethod
@@ -109,6 +107,9 @@ class Board:
 
     @staticmethod
     def place_piece(player1, player2, layout, location):
+        """Plaves a piece at location in the layout specified by layout, also
+        adds the piece to player1s piece set.
+        """
         layout[location[0]][location[1]] = player1.symbol
         player1.pieces.add(location)
 
@@ -116,49 +117,13 @@ class Board:
         return None
 
     @staticmethod
-    def isCentral(piece, colour):
+    def isStartingPos(piece, colour):
+        """Returns the starting pos for both players."""
         if colour == WHITE and piece == (1, 3):
             return True
         elif colour == BLACK and piece == (6, 4):
             return True
         return False
-
-    @staticmethod
-    def check_shrink_kill(state):
-        corners = set()
-        if state.total_turns == 128:
-            corners.update([(1, 1), (6, 1), (1, 6), (6, 6)])
-        elif state.total_turns == 192:
-            corners.update([(2, 2), (5, 2), (2, 5), (5, 5)])
-
-        for corner in corners:
-            p1row = Board.type_of_square(
-                corner[0]+1, corner[1], state.board.layout, state.total_turns)
-            if p1row in [WHITE, BLACK]:
-                players = state.get_players(p1row)
-                Board.check_move(
-                    (0, (corner[0]+1, corner[1])), state.board.layout, players[0], players[1], state.total_turns)
-
-            m1row = Board.type_of_square(
-                corner[0]-1, corner[1], state.board.layout, state.total_turns)
-            if m1row in [WHITE, BLACK]:
-                players = state.get_players(m1row)
-                Board.check_move(
-                    (0, (corner[0]-1, corner[1])), state.board.layout, players[0], players[1], state.total_turns)
-
-            p1col = Board.type_of_square(
-                corner[0], corner[1]+1, state.board.layout, state.total_turns)
-            if p1col in [WHITE, BLACK]:
-                players = state.get_players(p1col)
-                Board.check_move(
-                    (0, (corner[0], corner[1]+1)), state.board.layout, players[0], players[1], state.total_turns)
-
-            m1col = Board.type_of_square(
-                corner[0], corner[1]-1, state.board.layout, state.total_turns)
-            if m1col in [WHITE, BLACK]:
-                players = state.get_players(m1col)
-                Board.check_move(
-                    (0, (corner[0], corner[1]-1)), state.board.layout, players[0], players[1], state.total_turns)
 
 
 class Agent:
@@ -176,19 +141,23 @@ class Agent:
         states = []
         for i in game_state.get_player(symbol).pieces:
             # Checks if adjacent sqares are able to be moved to.
-            if Board.type_of_square(i[0] + 1, i[1], layout, num_moves) == FREE_TILE:
+            if Board.type_of_square(
+                    i[0] + 1, i[1], layout, num_moves) == FREE_TILE:
                 move = (i, (i[0] + 1, i[1]))
                 states.append(game_state.move_new_state(
                     game_state.generate_new_state(), move, symbol))
-            if Board.type_of_square(i[0] - 1, i[1], layout, num_moves) == FREE_TILE:
+            if Board.type_of_square(
+                    i[0] - 1, i[1], layout, num_moves) == FREE_TILE:
                 move = (i, (i[0] - 1, i[1]))
                 states.append(game_state.move_new_state(
                     game_state.generate_new_state(), move, symbol))
-            if Board.type_of_square(i[0], i[1] + 1, layout, num_moves) == FREE_TILE:
+            if Board.type_of_square(
+                    i[0], i[1] + 1, layout, num_moves) == FREE_TILE:
                 move = (i, (i[0], i[1] + 1))
                 states.append(game_state.move_new_state(
                     game_state.generate_new_state(), move, symbol))
-            if Board.type_of_square(i[0], i[1] - 1, layout, num_moves) == FREE_TILE:
+            if Board.type_of_square(
+                    i[0], i[1] - 1, layout, num_moves) == FREE_TILE:
                 move = (i, (i[0], i[1] - 1))
                 states.append(game_state.move_new_state(
                     game_state.generate_new_state(), move, symbol))
@@ -236,9 +205,9 @@ class Agent:
         else:
             black_offset = 2
 
-        for i in range(black_offset, 8-white_offset):
+        for i in range(black_offset, 8 - white_offset):
             for j in range(8):
-                if (i, j) not in corners and layout[i][j] == '-':
+                if (i, j) not in corners and layout[i][j] == "-":
                     place = (i, j)
                     states.append(game_state.place_new_state(
                         game_state.generate_new_state(), place, symbol))
@@ -259,20 +228,20 @@ class Agent:
         num_defended = 0
 
         for piece in player.pieces:
-            if ((Board.type_of_square(piece[0]-1, piece[1], layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0]-2, piece[1], layout, num_moves) == player.symbol or
-                  Board.type_of_square(piece[0]-2, piece[1], layout, num_moves) == CORNER_TILE)) or
-                (Board.type_of_square(piece[0]+1, piece[1], layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0]+2, piece[1], layout, num_moves) == player.symbol or
-                  Board.type_of_square(piece[0]+2, piece[1], layout, num_moves) == CORNER_TILE))):
+            if ((Board.type_of_square(piece[0] - 1, piece[1], layout, num_moves) == FREE_TILE and
+                 (Board.type_of_square(piece[0] - 2, piece[1], layout, num_moves) == player.symbol or
+                  Board.type_of_square(piece[0] - 2, piece[1], layout, num_moves) == CORNER_TILE)) or
+                (Board.type_of_square(piece[0] + 1, piece[1], layout, num_moves) == FREE_TILE and
+                 (Board.type_of_square(piece[0] + 2, piece[1], layout, num_moves) == player.symbol or
+                  Board.type_of_square(piece[0] + 2, piece[1], layout, num_moves) == CORNER_TILE))):
                 num_defended += 0.5
 
-            if ((Board.type_of_square(piece[0], piece[1]-1, layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0], piece[1]-2, layout, num_moves) == player.symbol or
-                  Board.type_of_square(piece[0], piece[1]-2, layout, num_moves) == CORNER_TILE)) or
-                (Board.type_of_square(piece[0], piece[1]+1, layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0], piece[1]+2, layout, num_moves) == player.symbol or
-                  Board.type_of_square(piece[0], piece[1]+2, layout, num_moves) == CORNER_TILE))):
+            if ((Board.type_of_square(piece[0], piece[1] - 1, layout, num_moves) == FREE_TILE and
+                 (Board.type_of_square(piece[0], piece[1] - 2, layout, num_moves) == player.symbol or
+                  Board.type_of_square(piece[0], piece[1] - 2, layout, num_moves) == CORNER_TILE)) or
+                (Board.type_of_square(piece[0], piece[1] + 1, layout, num_moves) == FREE_TILE and
+                 (Board.type_of_square(piece[0], piece[1] + 2, layout, num_moves) == player.symbol or
+                  Board.type_of_square(piece[0], piece[1] + 2, layout, num_moves) == CORNER_TILE))):
                 num_defended += 0.5
 
         return num_defended
@@ -288,16 +257,16 @@ class Agent:
         num_defended = 0
 
         for piece in player.pieces:
-            if ((Board.type_of_square(piece[0]-1, piece[1], layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0]-2, piece[1], layout, num_moves) == player.symbol)) or
-                (Board.type_of_square(piece[0]+1, piece[1], layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0]+2, piece[1], layout, num_moves) == player.symbol))):
+            if ((Board.type_of_square(piece[0] - 1, piece[1], layout, num_moves) == FREE_TILE and
+                 (Board.type_of_square(piece[0] - 2, piece[1], layout, num_moves) == player.symbol)) or
+                (Board.type_of_square(piece[0] + 1, piece[1], layout, num_moves) == FREE_TILE and
+                 (Board.type_of_square(piece[0] + 2, piece[1], layout, num_moves) == player.symbol))):
                 num_defended += 0.5
 
-            if ((Board.type_of_square(piece[0], piece[1]-1, layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0], piece[1]-2, layout, num_moves) == player.symbol)) or
-                (Board.type_of_square(piece[0], piece[1]+1, layout, num_moves) == FREE_TILE and
-                 (Board.type_of_square(piece[0], piece[1]+2, layout, num_moves) == player.symbol))):
+            if ((Board.type_of_square(piece[0], piece[1] - 1, layout, num_moves) == FREE_TILE and
+                 (Board.type_of_square(piece[0], piece[1] - 2, layout, num_moves) == player.symbol)) or
+                (Board.type_of_square(piece[0], piece[1] + 1, layout, num_moves) == FREE_TILE and
+                 (Board.type_of_square(piece[0], piece[1] + 2, layout, num_moves) == player.symbol))):
                 num_defended += 0.5
 
         return num_defended
@@ -307,10 +276,10 @@ class Agent:
         num_threatened = 0
 
         for piece in player.pieces:
-            if (Board.type_of_square(piece[0]-1, piece[1], layout, num_moves) == enemy_colour or
-                Board.type_of_square(piece[0]+1, piece[1], layout, num_moves) == enemy_colour or
-                Board.type_of_square(piece[0], piece[1]-1, layout, num_moves) == enemy_colour or
-                    Board.type_of_square(piece[0], piece[1]+1, layout, num_moves) == enemy_colour):
+            if (Board.type_of_square(piece[0] - 1, piece[1], layout, num_moves) == enemy_colour or
+                Board.type_of_square(piece[0] + 1, piece[1], layout, num_moves) == enemy_colour or
+                Board.type_of_square(piece[0], piece[1] - 1, layout, num_moves) == enemy_colour or
+                    Board.type_of_square(piece[0], piece[1] + 1, layout, num_moves) == enemy_colour):
                 num_threatened += 1
 
         return num_threatened
@@ -340,7 +309,7 @@ class GameState:
             return self.black_player
 
     def get_players(self, control_colour):
-        """Returns the controlling player as player one and the enemy of the 
+        """Returns the controlling player as player one and the enemy of the
         controlling player as player two.
         """
         if control_colour == self.agent_colour:
@@ -362,7 +331,8 @@ class GameState:
         if self.total_turns == 128 or self.total_turns == 192:
             for i in range(8):
                 for j in range(8):
-                    if Board.type_of_square(i, j, self.board.layout, self.total_turns) in [OUT_TILE, CORNER_TILE] and self.board.layout[i][j] != '-':
+                    if Board.type_of_square(i, j, self.board.layout, self.total_turns) in [
+                            OUT_TILE, CORNER_TILE] and self.board.layout[i][j] != "-":
                         if self.board.layout[i][j] == WHITE:
                             Board.kill((i, j), self.white_player,
                                        self.board.layout)
@@ -370,12 +340,13 @@ class GameState:
                             Board.kill((i, j), self.black_player,
                                        self.board.layout)
 
-            Board.check_shrink_kill(self)
+            self.check_shrink_kill()
 
         return None
 
     def game_terminal_state(self):
-        if len(self.white_player.pieces) < 2 or len(self.black_player.pieces) < 2:
+        if len(self.white_player.pieces) < 2 or len(
+                self.black_player.pieces) < 2:
             return True
         else:
             return False
@@ -384,17 +355,18 @@ class GameState:
         agent_player = self.get_player(self.agent_colour)
         num_defended = Agent.defended_pieces(
             agent_player, self.board.layout, self.total_turns)
-        num_captured = self.total_turns/2 - \
+        num_captured = self.total_turns / 2 - \
             len(self.get_player(self.enemy_colour).pieces)
-        num_lost = self.total_turns/2 - len(agent_player.pieces)
+        num_lost = self.total_turns / 2 - len(agent_player.pieces)
 
         central = False
-        if self.total_turns in [1, 2] and len(agent_player.pieces) != 0 and Board.isCentral(next(iter(agent_player.pieces)), agent_player.symbol):
+        if self.total_turns in [1, 2] and len(agent_player.pieces) != 0 and Board.isStartingPos(
+                next(iter(agent_player.pieces)), agent_player.symbol):
             central = True
         if central:
             return (float(100), self)
 
-        score = 5*num_captured - 2*num_lost + 0.5*num_defended
+        score = 5 * num_captured - 2 * num_lost + 0.5 * num_defended
 
         return (score, self)
 
@@ -411,7 +383,8 @@ class GameState:
             original_state.agent_colour).pieces) - len(agent_player.pieces)
         num_threatened = Agent.threatened_pieces(
             agent_player, self.board.layout, self.total_turns, self.enemy_colour)
-        score = 2*num_captured - 2*num_lost + 0.5*num_defended + 0.5*num_threatened
+        score = 2 * num_captured - 2 * num_lost + \
+            0.5 * num_defended + 0.5 * num_threatened
 
         # calculate evals and returns a score and the state
         # possible evals:
@@ -459,7 +432,8 @@ class GameState:
         return state
 
     @staticmethod
-    def minimax(game_state, depth, alpha, beta, max_player, placing, original_state):
+    def minimax(game_state, depth, alpha, beta,
+                max_player, placing, original_state):
         # done as per wikipedia's alpha-beta
 
         # checks terminal state or cut off
@@ -488,7 +462,7 @@ class GameState:
             for state in states:
                 passed_state = state[1]
                 result = GameState.minimax(
-                    passed_state, depth-1, alpha, beta, False, placing, original_state)
+                    passed_state, depth - 1, alpha, beta, False, placing, original_state)
                 if v[0] < result[0]:
                     v = result
                 alpha = max(alpha, v[0])
@@ -514,7 +488,7 @@ class GameState:
             for state in states:
                 passed_state = state[1]
                 result = GameState.minimax(
-                    passed_state, depth-1, alpha, beta, True, placing, original_state)
+                    passed_state, depth - 1, alpha, beta, True, placing, original_state)
                 if v[0] > result[0]:
                     v = result
                 beta = min(beta, v[0])
@@ -547,25 +521,65 @@ class GameState:
                 "-inf"), float("+inf"), True, self.placing_phase, self)
         print(returned_state)
 
-        # trace back to node before the original game state and return the state's move
+        # trace back to node before the original game state and return the
+        # state's move
         state = returned_state[1]
-        while state.parent.parent != None:
+        while state.parent.parent is not None:
 
             state = state.parent
 
         return state.move
 
+    def check_shrink_kill(self):
+        """Checks board layout after a shrink and kills pieces next to corners.
+        """
+        corners = set()
+        if self.total_turns == 128:
+            corners.update([(1, 1), (6, 1), (1, 6), (6, 6)])
+        elif self.total_turns == 192:
+            corners.update([(2, 2), (5, 2), (2, 5), (5, 5)])
+
+        for corner in corners:
+            p1row = Board.type_of_square(
+                corner[0] + 1, corner[1], self.board.layout, self.total_turns)
+            if p1row in [WHITE, BLACK]:
+                players = self.get_players(p1row)
+                Board.check_move(
+                    (0, (corner[0] + 1, corner[1])), self.board.layout, players[0], players[1], self.total_turns)
+
+            m1row = Board.type_of_square(
+                corner[0] - 1, corner[1], self.board.layout, self.total_turns)
+            if m1row in [WHITE, BLACK]:
+                players = self.get_players(m1row)
+                Board.check_move(
+                    (0, (corner[0] - 1, corner[1])), self.board.layout, players[0], players[1], self.total_turns)
+
+            p1col = Board.type_of_square(
+                corner[0], corner[1] + 1, self.board.layout, self.total_turns)
+            if p1col in [WHITE, BLACK]:
+                players = self.get_players(p1col)
+                Board.check_move(
+                    (0, (corner[0], corner[1] + 1)), self.board.layout, players[0], players[1], self.total_turns)
+
+            m1col = Board.type_of_square(
+                corner[0], corner[1] - 1, self.board.layout, self.total_turns)
+            if m1col in [WHITE, BLACK]:
+                players = self.get_players(m1col)
+                Board.check_move(
+                    (0, (corner[0], corner[1] - 1)), self.board.layout, players[0], players[1], self.total_turns)
+        return None
+
 
 class Player:
     def __init__(self, colour):
-        symbol = ''
-        if colour == 'white':
+        if colour == "white":
             symbol = WHITE
         else:
             symbol = BLACK
         self.g_s = GameState(symbol)
 
     def action(self, turns):
+        """Returns the next action for either the placing or moving phase."""
         action = self.g_s.choose_best_move()
 
         players = self.g_s.get_players(self.g_s.agent_colour)
@@ -586,6 +600,7 @@ class Player:
             return ((action[0][1], action[0][0]), (action[1][1], action[1][0]))
 
     def update(self, action):
+        """Updates the gamestate to respect the oponents move."""
         if self.g_s.placing_phase:
             action = (action[1], action[0])
         else:
